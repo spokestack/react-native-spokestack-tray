@@ -11,11 +11,11 @@ npm install react-native-spokestack-tray
 ## Usage
 
 ```js
-import SpokestackTray from "react-native-spokestack-tray";
+import SpokestackTray from 'react-native-spokestack-tray'
 
 // ...
 
-const result = await SpokestackTray.multiply(3, 7);
+const result = await SpokestackTray.multiply(3, 7)
 ```
 
 ## Contributing

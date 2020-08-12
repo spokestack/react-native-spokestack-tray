@@ -20,14 +20,15 @@
     "!**/__mocks__"
   ],
   "scripts": {
-    "test": "jest",
-    "typescript": "tsc --noEmit",
-    "lint": "eslint \"**/*.{js,ts,tsx}\"",
+    "bootstrap": "npm install && npm run example && npm run pods",
+    "example": "cd example && npm install",
+    "format": "prettier --write \"**/*.tsx\" \"**/*.js\" \"**/*.md\"",
+    "lint": "eslint \"**/*.{js,ts,tsx}\" && prettier --check \"**/*.md\"",
+    "pods": "cd example && pod-install --quiet",
     "prepare": "bob build",
     "release": "release-it",
-    "example": "cd example && npm install",
-    "pods": "cd example && pod-install --quiet",
-    "bootstrap": "npm install && npm run example && npm run pods"
+    "test": "jest",
+    "typescript": "tsc --noEmit"
   },
   "keywords": [
     "react-native",
@@ -110,10 +111,11 @@
       "prettier/prettier": [
         "error",
         {
-          "quoteProps": "consistent",
+          "arrowParens": "always",
+          "semi": false,
           "singleQuote": true,
           "tabWidth": 2,
-          "trailingComma": "es5",
+          "trailingComma": "none",
           "useTabs": false
         }
       ]
@@ -124,10 +126,11 @@
     "lib/"
   ],
   "prettier": {
-    "quoteProps": "consistent",
+    "arrowParens": "always",
+    "semi": false,
     "singleQuote": true,
     "tabWidth": 2,
-    "trailingComma": "es5",
+    "trailingComma": "none",
     "useTabs": false
   },
   "@react-native-community/bob": {
