@@ -23,7 +23,7 @@
     "bootstrap": "npm install && npm run example && npm run pods",
     "example": "cd example && npm install",
     "format": "prettier --write \"**/*.tsx\" \"**/*.js\" \"**/*.md\"",
-    "lint": "eslint \"**/*.{js,ts,tsx}\" && prettier --check \"**/*.md\"",
+    "lint": "eslint \"**/*.{js,ts,tsx}\" && prettier --check \"**/*.md\" \"**/*.json\"",
     "pods": "cd example && pod-install --quiet",
     "prepare": "bob build",
     "release": "release-it",
