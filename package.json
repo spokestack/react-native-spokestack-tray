@@ -2,10 +2,10 @@
   "name": "react-native-spokestack-tray",
   "version": "0.1.0",
   "description": "A React Native component for adding Spokestack to any React Native app",
-  "main": "lib/commonjs/index",
-  "module": "lib/module/index",
+  "main": "lib/commonjs/index.js",
+  "module": "lib/module/index.js",
   "types": "lib/typescript/src/index.d.ts",
-  "react-native": "src/index",
+  "react-native": "src/index.tsx",
   "source": "src/index",
   "scripts": {
     "bootstrap": "npm install && npm run example && npm run pods",
@@ -21,14 +21,14 @@
   "files": [
     "src",
     "lib",
+    "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
     "android",
     "ios",
     "cpp",
     "react-native-spokestack-tray.podspec",
-    "!lib/typescript/example",
-    "!**/__tests__",
-    "!**/__fixtures__",
-    "!**/__mocks__"
+    "!lib/typescript/example"
   ],
   "keywords": [
     "react-native",
@@ -43,17 +43,8 @@
   },
   "homepage": "https://github.com/spokestack/react-native-spokestack-tray#readme",
   "dependencies": {
-    "@react-native-community/async-storage": "^1.11.0",
-    "@react-native-community/netinfo": "^5.9.6",
-    "@types/lodash": "^4.14.159",
     "color": "^3.1.2",
-    "lodash": "^4.17.19",
-    "react-native-haptic-feedback": "^1.10.0",
-    "react-native-linear-gradient": "^2.5.6",
-    "react-native-permissions": "^2.1.5",
-    "react-native-spokestack": "^3.2.7",
-    "react-native-video": "^4.4.5",
-    "rn-fetch-blob": "^0.12.0"
+    "lodash": "^4.17.19"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^8.3.4",
@@ -61,6 +52,7 @@
     "@react-native-community/eslint-config": "^2.0.0",
     "@release-it/conventional-changelog": "^1.1.4",
     "@types/color": "^3.0.1",
+    "@types/lodash": "^4.14.159",
     "@types/jest": "^26.0.0",
     "@types/react": "^16.9.19",
     "@types/react-native": "0.62.13",
@@ -80,8 +72,16 @@
     "typescript": "^3.8.3"
   },
   "peerDependencies": {
+    "@react-native-community/async-storage": ">=1.11.0",
+    "@react-native-community/netinfo": ">=5.9.6",
     "react": "*",
-    "react-native": "*"
+    "react-native": "*",
+    "react-native-haptic-feedback": ">=1.10.0",
+    "react-native-linear-gradient": ">=2.5.6",
+    "react-native-permissions": ">=2.1.5",
+    "react-native-spokestack": ">=3.2.7",
+    "react-native-video": ">=4.4.5",
+    "rn-fetch-blob": ">=0.12.0"
   },
   "jest": {
     "preset": "react-native",
