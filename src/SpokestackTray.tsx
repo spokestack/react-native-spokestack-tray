@@ -47,6 +47,13 @@ export interface IntentResult {
 interface Props {
   /** Width (and height) of the mic button */
   buttonWidth?: number
+  /**
+   * Your Spokestack tokens generated in your Spokestack account
+   * at https://spokestack.io/account.
+   * Create an account for free then generate a token.
+   */
+  clientId: string
+  clientSecret: string
   /** How long to wait to close the tray after speaking (ms) */
   closeDelay?: number
   /** Duration for the tray animation (ms) */
@@ -64,6 +71,11 @@ interface Props {
    */
   exitNodes?: string[]
   /**
+   * Font to use for "LISTENING...", "LOADING...",
+   * and chat bubble text.
+   */
+  fontFamily?: string
+  /**
    * Colors for the linear gradient shown when listening
    */
   gradientColors?: string[]
@@ -73,11 +85,21 @@ interface Props {
    * Default: false
    */
   greet?: boolean
+  /**
+   * This function takes an intent from the NLU
+   * and returns an object with a unique conversation
+   * node name (that you define) and a prompt
+   * to be processed by TTS and spoken.
+   *
+   * Note: the prompt is only shown in a chat bubble
+   * if sound has been turned off.
+   */
   handleIntent: (
     intent: string,
     slots?: any,
     utterance?: string
   ) => IntentResult
+  haptic?: boolean
   /** Minimum height for the tray */
   minHeight?: number
   onClose?: () => void
@@ -166,17 +188,18 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   })
 
   static defaultProps: Partial<Props> = {
+    buttonWidth: 60,
     closeDelay: 0,
     duration: 500,
     easing: Easing.bezier(0.77, 0.41, 0.2, 0.84),
     gradientColors: ['#d83e68', '#fc00ff', '#00dbde'],
     greet: false,
-    startHeight: 220,
+    haptic: true,
     minHeight: 170,
-    buttonWidth: 60,
     orientation: 'left',
     primaryColor: '#d83e68',
     sayGreeting: true,
+    startHeight: 220,
     ttsFormat: TTSFormat.TEXT,
     voice: 'demo-male'
   }
@@ -194,10 +217,17 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   }
 
   async componentDidMount() {
+    const { clientId, clientSecret } = this.props
     this.addListeners()
     this.initState()
     Spokestack.initialize({
-      editTranscript: this.props.editTranscript
+      editTranscript: this.props.editTranscript,
+      spokestackConfig: {
+        tts: {
+          'spokestack-id': clientId,
+          'spokestack-secret': clientSecret
+        }
+      }
     })
       .then(Spokestack.start)
       .then(this.showHandle)
@@ -369,8 +399,11 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   }
 
   listeningStarted = () => {
+    const { haptic } = this.props
     this.setState({ listening: true, loading: false }, this.open)
-    HapticFeedback.trigger('impactHeavy', { enableVibrateFallback: true })
+    if (haptic) {
+      HapticFeedback.trigger('impactHeavy', { enableVibrateFallback: true })
+    }
   }
 
   listeningStopped = () => {
@@ -774,7 +807,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#e7ebee'
   },
   listeningText: {
-    fontFamily: 'Roboto-Medium',
     fontSize: 14,
     color: 'rgba(0, 0, 0, 0.5)'
   },

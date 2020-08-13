@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
+    "dev": "react-native start --reset-cache",
     "ios": "react-native run-ios",
     "pods": "npx pod-install",
     "start": "react-native start"

@@ -53,5 +53,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>SpokestackTrayExample uses the microphone to hear voice commands</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>SpokestackTrayExample uses speech recognition to process voice commands</string>
 </dict>
 </plist>

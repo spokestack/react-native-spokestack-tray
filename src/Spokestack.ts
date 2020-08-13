@@ -7,13 +7,8 @@ import RNSpokestack, {
 import { checkSpeech, requestSpeech } from './permissions'
 
 import { download } from './Download'
+import merge from 'lodash/merge'
 import rafForeground from './rafForeground'
-
-if (!process.env.BARTENDER_CLIENT_ID || !process.env.BARTENDER_CLIENT_SECRET) {
-  throw new Error(
-    'BARTENDER_CLIENT_ID and BARTENDER_CLIENT_SECRET are not set in the environment.'
-  )
-}
 
 export enum ListenerType {
   CHANGE = 'change',
@@ -117,6 +112,7 @@ function runNativeCommand(
 interface Config {
   /** Edit the transcript before passing it to onRecognize and classify */
   editTranscript?: (transcript: string) => string
+  spokestackConfig?: Partial<SpokestackConfig>
 }
 
 async function init(config: Config = {}) {
@@ -183,46 +179,47 @@ async function init(config: Config = {}) {
     return
   }
 
-  const spokestackOpts: SpokestackConfig = {
-    input: 'io.spokestack.spokestack.android.PreASRMicrophoneInput',
-    stages: [
-      'io.spokestack.spokestack.webrtc.AcousticNoiseSuppressor',
-      'io.spokestack.spokestack.webrtc.AutomaticGainControl',
-      'io.spokestack.spokestack.webrtc.VoiceActivityDetector',
-      'io.spokestack.spokestack.wakeword.WakewordTrigger',
-      'io.spokestack.spokestack.android.AndroidSpeechRecognizer',
-      'io.spokestack.spokestack.ActivationTimeout'
-    ],
-    properties: {
-      locale: 'en-US',
-      'wake-filter-path': paths[0] as string,
-      'wake-detect-path': paths[1] as string,
-      'wake-encode-path': paths[2] as string,
-      'ans-policy': 'aggressive',
-      'agc-target-level-dbfs': 3,
-      'agc-compression-gain-db': 15,
-      'vad-mode': 'very-aggressive',
-      'vad-fall-delay': 800,
-      'wake-threshold': 0.9,
-      'wake-active-min': 2000,
-      'wake-active-max': 5000,
-      'fft-window-size': 512,
-      'fft-hop-length': 10,
-      'pre-emphasis': 0.97,
-      // 'trace-level': RNSpokestack.TraceLevel.DEBUG
-      'trace-level': RNSpokestack.TraceLevel.NONE
+  const spokestackOpts: SpokestackConfig = merge(
+    {
+      input: 'io.spokestack.spokestack.android.PreASRMicrophoneInput',
+      stages: [
+        'io.spokestack.spokestack.webrtc.AcousticNoiseSuppressor',
+        'io.spokestack.spokestack.webrtc.AutomaticGainControl',
+        'io.spokestack.spokestack.webrtc.VoiceActivityDetector',
+        'io.spokestack.spokestack.wakeword.WakewordTrigger',
+        'io.spokestack.spokestack.android.AndroidSpeechRecognizer',
+        'io.spokestack.spokestack.ActivationTimeout'
+      ],
+      properties: {
+        locale: 'en-US',
+        'wake-filter-path': paths[0] as string,
+        'wake-detect-path': paths[1] as string,
+        'wake-encode-path': paths[2] as string,
+        'ans-policy': 'aggressive',
+        'agc-target-level-dbfs': 3,
+        'agc-compression-gain-db': 15,
+        'vad-mode': 'very-aggressive',
+        'vad-fall-delay': 800,
+        'wake-threshold': 0.9,
+        'wake-active-min': 2000,
+        'wake-active-max': 5000,
+        'fft-window-size': 512,
+        'fft-hop-length': 10,
+        'pre-emphasis': 0.97,
+        // 'trace-level': RNSpokestack.TraceLevel.DEBUG
+        'trace-level': RNSpokestack.TraceLevel.NONE
+      },
+      tts: {
+        ttsServiceClass: 'io.spokestack.spokestack.tts.SpokestackTTSService'
+      },
+      nlu: {
+        'nlu-model-path': paths[3] as string,
+        'wordpiece-vocab-path': paths[4] as string,
+        'nlu-metadata-path': paths[5] as string
+      }
     },
-    tts: {
-      ttsServiceClass: 'io.spokestack.spokestack.tts.SpokestackTTSService',
-      'spokestack-id': process.env.BARTENDER_CLIENT_ID,
-      'spokestack-secret': process.env.BARTENDER_CLIENT_SECRET
-    },
-    nlu: {
-      'nlu-model-path': paths[3] as string,
-      'wordpiece-vocab-path': paths[4] as string,
-      'nlu-metadata-path': paths[5] as string
-    }
-  }
+    config.spokestackConfig
+  )
 
   RNSpokestack.onInit = (e) => {
     console.log('[Spokestack onInit]:', JSON.stringify(e))

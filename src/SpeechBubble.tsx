@@ -51,7 +51,6 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   bubbleText: {
-    fontFamily: 'Roboto-Regular',
     fontSize: 14,
     color: '#262226'
   }
