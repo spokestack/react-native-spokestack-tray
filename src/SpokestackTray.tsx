@@ -3,6 +3,7 @@ import * as Spokestack from './Spokestack'
 import {
   Animated,
   AppState,
+  AppStateStatus,
   Dimensions,
   Easing,
   EasingFunction,
@@ -517,9 +518,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     }
   }
 
-  private appStateChange = (
-    nextAppState: 'inactive' | 'background' | 'active'
-  ) => {
+  private appStateChange = (nextAppState: AppStateStatus) => {
     console.log(
       `App state changed to ${nextAppState}, and wentToBackground is ${this.wentToBackground}`
     )
@@ -527,11 +526,11 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     if (nextAppState === 'active' && this.wentToBackground) {
       this.wentToBackground = false
       console.log('App became active. Starting wakeword.')
-      return Spokestack.start()
+      Spokestack.start()
     } else if (nextAppState === 'background') {
       this.wentToBackground = true
       console.log('App went to background. Stopping speech pipeline.')
-      return Spokestack.stop()
+      Spokestack.stop()
     }
   }
 
