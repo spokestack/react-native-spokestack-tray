@@ -97,7 +97,7 @@ defaultOptions.replace(rdefaultProps, function (all, key, value) {
   return all
 })
 const trayProps = getInterfaceContent('_src_spokestacktray_.props.md')
-data += '\n---\n\n## SpokestackTray Component Props'
+data += '\n---\n\n## `<SpokestackTray />` Component Props'
 data += trayProps
   // Add in default values to option descriptions
   .replace(rprops, function (all, key) {
@@ -141,7 +141,7 @@ getEnumContent('_src_spokestack_.listenertype.md').replace(
 )
 
 // Add SpokestackTray methods
-data += '\n---\n\n## SpokestackTray Component Methods\n'
+data += '\n---\n\n## `<SpokestackTray />` Component Methods\n'
 data +=
   '\nThese methods are available from the SpokestackTray component. Use a React ref to access these methods.'
 data += `
