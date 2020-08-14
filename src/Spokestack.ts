@@ -148,36 +148,42 @@ async function init(config: Config = {}) {
     return
   }
   const editTranscript = config.editTranscript || ((transcript) => transcript)
-  let wakewordFiles: string[] = []
   let nluFiles: string[] = []
 
-  if (config.wakewordModelUrls) {
-    wakewordFiles =
-      (await Promise.all(
-        map(config.wakewordModelUrls, (url, name) =>
-          download(
-            url,
-            { id: name },
-            {
-              forceCellular: true,
-              fetchBlobConfig: {
-                appendExt: 'tflite',
-                overwrite: config.refreshModels
-              }
-            }
-          )
-        )
-      ).catch((error) => {
-        console.error('Failed to download Spokestack model files', error)
-        execute(ListenerType.ERROR, {
-          error: 'Failed to download Spokestack wakeword files'
-        })
-      })) || []
-  } else {
+  if (!config.wakewordModelUrls) {
     console.warn(
-      'No wakeword model URLs provided. Wakeword will not be turned on.'
+      'No wakeword model URLs specified. Using "Spokestack" wakeword files.'
     )
+    config.wakewordModelUrls = {
+      filter:
+        'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/filter.lite',
+      detect:
+        'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/detect.lite',
+      encode:
+        'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/encode.lite'
+    }
   }
+  const wakewordFiles =
+    (await Promise.all(
+      map(config.wakewordModelUrls, (url, name) =>
+        download(
+          url,
+          { id: name },
+          {
+            forceCellular: true,
+            fetchBlobConfig: {
+              appendExt: 'tflite',
+              overwrite: config.refreshModels
+            }
+          }
+        )
+      )
+    ).catch((error) => {
+      console.error('Failed to download Spokestack model files', error)
+      execute(ListenerType.ERROR, {
+        error: 'Failed to download Spokestack wakeword files'
+      })
+    })) || []
 
   if (config.nluModelUrls) {
     nluFiles =
@@ -222,7 +228,9 @@ async function init(config: Config = {}) {
         })
       })) || []
   } else {
-    console.warn('No NLU model URLs provided. NLU will not work.')
+    console.warn(
+      'No NLU model URLs provided. ASR will work, but without NLU. See https://spokestack.io/docs/Concepts/nlu for details.'
+    )
   }
 
   const spokestackOpts: SpokestackConfig = merge(
