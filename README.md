@@ -34,12 +34,15 @@ $ npm install react-native-permissions
 # Used to generate a haptic whenever Spokestack listens.
 # This can be turned off, but the dependency is still needed.
 $ npm install react-native-haptic-feedback
-
-# A one-liner to install all dependencies
-$ npm install react-native-spokestack-tray react-native-spokestack @react-native-community/async-storage @react-native-community/netinfo react-native-video rn-fetch-blob react-native-haptic-feedback react-native-linear-gradient react-native-permissions
 ```
 
-After installing dependencies, first edit your Podfile before running `pod install`.
+A one-linear to install all dependencies
+
+```sh
+npm install react-native-spokestack-tray react-native-spokestack @react-native-community/async-storage @react-native-community/netinfo react-native-video rn-fetch-blob react-native-haptic-feedback react-native-linear-gradient react-native-permissions
+```
+
+Do not run `pod install` yet.
 
 ### Edit Podfile
 
@@ -53,8 +56,7 @@ target 'SpokestackTrayExample' do
   pod 'Permission-SpeechRecognition', :path => "#{permissions_path}/SpeechRecognition.podspec"
 ```
 
-Because a couple of our dependencies are written using Swift, we need to use
-`use_frameworks!` in our Podfile.
+We need to use `use_frameworks!` in our Podfile because a couple of our dependencies are written using Swift.
 
 ```ruby
 target 'SpokestackTrayExample' do
