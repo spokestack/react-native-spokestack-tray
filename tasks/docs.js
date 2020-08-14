@@ -40,6 +40,13 @@ function getInterfaceContent(filename) {
     .replace(/\n### /g, '\n### ')
 }
 
+function getEnumContent(filename) {
+  return redoLinks(read(`../docs/enums/${filename}`))
+    .replace(/[\w\W]+##\s*Enumeration members/, '')
+    .replace(/___/g, '')
+    .replace(/\n### /g, '\n### ')
+}
+
 /**
  * @param {string} filename
  * @param {Array<string>} functions List of functions to extract from docs
@@ -56,6 +63,9 @@ function getModuleFunctions(filename, functions) {
     })
     .join('\n\n')
 }
+
+const rprops = /\*\*(\w+)\*\*\??\s*: \*\w+\*/g
+const rdefaultProps = /\*\*(\w+)\*\*: (?:\*\w+\* )?= (["\w-.]+)/g
 
 // Start with the README
 const header = '\n---\n\n# Documentation'
@@ -76,11 +86,7 @@ const defaultOptions = redoLinks(
   .replace(/[\w\W]+\*\*defaultProps\*\*: \*object\*/, '')
 
 const parsedDefaults = {}
-defaultOptions.replace(/\*\*(\w+)\*\*: \*\w+\* = (["\w-.]+)/g, function (
-  all,
-  key,
-  value
-) {
+defaultOptions.replace(rdefaultProps, function (all, key, value) {
   parsedDefaults[key] = value
   return all
 })
@@ -88,14 +94,45 @@ const trayProps = getInterfaceContent('_src_spokestacktray_.props.md')
 data += '\n\n## SpokestackTray Component Props'
 data += trayProps
   // Add in default values to option descriptions
-  .replace(/\*\*(\w+)\*\*\??\s*: \*\w+\*/g, function (all, key) {
+  .replace(rprops, function (all, key) {
     return parsedDefaults[key]
       ? `${all} (Default: **${parsedDefaults[key]}**)`
       : all
   })
 
+// Add IntentResult definition
+data += '\n---\n\n#### `IntentResult`\n'
+data += 'IntentResult is the expected return type of `handleIntent`.\n'
+getInterfaceContent('_src_spokestacktray_.intentresult.md').replace(
+  rprops,
+  function (all) {
+    data += `\n${all}\n`
+  }
+)
+
+// Add ListenerEvent definition
+data += '\n---\n\n#### `ListenerEvent`\n'
+data += 'ListenerEvent is passed to some callbacks. '
+data +=
+  'Usually, only `type` and one other property is defined, depending on the context.\n\n'
+getInterfaceContent('_src_spokestack_.listenerevent.md').replace(
+  rprops,
+  function (all) {
+    data += `\n${all}\n`
+  }
+)
+// Add ListenerType enum
+data += '\n---\n\n#### `ListenerType` enum\n'
+data += '`ListenerType` is used in `ListenerEvent`\n'
+getEnumContent('_src_spokestack_.listenertype.md').replace(
+  rdefaultProps,
+  function (all) {
+    data += `\n${all}\n`
+  }
+)
+
 // Add SpokestackTray methods
-data += '\n\n## SpokestackTray Component Methods\n'
+data += '\n---\n\n## SpokestackTray Component Methods\n'
 data +=
   '\nThese methods are available from the SpokestackTray component. Use a React ref to access these methods.'
 data += `

@@ -1,5 +1,5 @@
-export { listen, isListening } from './Spokestack'
+import SpokestackTray, { IntentResult } from './SpokestackTray'
+export { listen, isListening, ListenerEvent, ListenerType } from './Spokestack'
 
-import SpokestackTray from './SpokestackTray'
-
+export { IntentResult }
 export default SpokestackTray
