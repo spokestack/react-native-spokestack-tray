@@ -78,7 +78,11 @@ let data =
 data += '\n\n## Spokestack Functions'
 data +=
   '\n\nThese functions are available as exports from react-native-spokestack-tray\n\n'
-data += getModuleFunctions('_src_spokestack_.md', ['listen', 'isListening'])
+data += getModuleFunctions('_src_spokestack_.md', [
+  'listen',
+  'stopListening',
+  'isListening'
+])
 
 // Add Spokestack tray props
 const defaultOptions = redoLinks(

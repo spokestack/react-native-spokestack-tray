@@ -584,7 +584,6 @@ export async function listen() {
 
 /**
  * Tell Spokestack to stop listening with ASR.
- * Note: this does not stop wakeword (use `stop` for that).
  *
  * ```js
  * import { stopListening } from 'react-native-spokestack-tray
