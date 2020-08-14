@@ -22,7 +22,6 @@
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": false,
-    "target": "esnext",
-    "types": ["./types/declaration"]
+    "target": "esnext"
   }
 }
