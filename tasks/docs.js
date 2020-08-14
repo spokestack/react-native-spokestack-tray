@@ -37,7 +37,7 @@ function getInterfaceContent(filename) {
   return redoLinks(read(`../docs/interfaces/${filename}`))
     .replace(/[\w\W]+##\s*Properties/, '')
     .replace(/___/g, '')
-    .replace(/\n### /g, '\n##### ')
+    .replace(/\n### /g, '\n#### ')
 }
 
 /**
