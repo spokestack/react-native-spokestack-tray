@@ -512,7 +512,7 @@ export async function stop() {
  * This will also open the tray.
  *
  * ```js
- * import { listen } from 'react-native-spokestack-tray
+ * import { listen } from 'react-native-spokestack-tray'
  *
  * // ...
  *

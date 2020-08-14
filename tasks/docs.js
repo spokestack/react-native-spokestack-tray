@@ -37,7 +37,7 @@ function getInterfaceContent(filename) {
   return redoLinks(read(`../docs/interfaces/${filename}`))
     .replace(/[\w\W]+##\s*Properties/, '')
     .replace(/___/g, '')
-    .replace(/\b###\b/g, '#####')
+    .replace(/\n### /g, '\n##### ')
 }
 
 /**
@@ -58,24 +58,22 @@ function getModuleFunctions(filename, functions) {
 }
 
 // Start with the README
-const header = '\n---\n\n## Documentation'
+const header = '\n---\n\n# Documentation'
 let data =
   read('../README.md').replace(new RegExp(header + '[\\w\\W]+'), '') + header
 
 // Add default exported functions
-data += '\n\n### Spokestack Functions'
+data += '\n\n## Spokestack Functions'
 data +=
   '\n\nThese functions are available as exports from react-native-spokestack-tray\n\n'
 data += getModuleFunctions('_src_spokestack_.md', ['listen', 'isListening'])
 
 // Add Spokestack tray props
-const rOptional = /`Optional` /g
 const defaultOptions = redoLinks(
   read('../docs/classes/_src_spokestacktray_.spokestacktray.md')
 )
   // Remove unwanted text
   .replace(/[\w\W]+\*\*defaultProps\*\*: \*object\*/, '')
-  .replace(rOptional, '')
 
 const parsedDefaults = {}
 defaultOptions.replace(/\*\*(\w+)\*\*: \*\w+\* = (["\w-.]+)/g, function (
@@ -86,11 +84,8 @@ defaultOptions.replace(/\*\*(\w+)\*\*: \*\w+\* = (["\w-.]+)/g, function (
   parsedDefaults[key] = value
   return all
 })
-const trayProps = getInterfaceContent(
-  '_src_spokestacktray_.props.md',
-  'SpokestackTray Component Props'
-)
-data += '\n\n### SpokestackTray Component Props'
+const trayProps = getInterfaceContent('_src_spokestacktray_.props.md')
+data += '\n\n## SpokestackTray Component Props'
 data += trayProps
   // Add in default values to option descriptions
   .replace(/\*\*(\w+)\*\*\??\s*: \*\w+\*/g, function (all, key) {
@@ -100,7 +95,7 @@ data += trayProps
   })
 
 // Add SpokestackTray methods
-data += '\n\n### SpokestackTray Component Methods\n'
+data += '\n\n## SpokestackTray Component Methods\n'
 data +=
   '\nThese methods are available from the SpokestackTray component. Use a React ref to access these methods.'
 data += `
