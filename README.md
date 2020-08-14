@@ -48,6 +48,12 @@ Do not run `pod install` yet.
 
 ### Edit Podfile
 
+Our main dependency (react-native-spokestack) makes use of advanced APIs only available in iOS 13+. Make sure to set your deployment target to iOS 13, and set the following
+
+```ruby
+platform :ios, '13.0'
+```
+
 We use [react-native-permissions](https://github.com/react-native-community/react-native-permissions) to check and request the Microphone permission (iOS and Android) and the Speech Recognition permission (iOS only). This library separates each permission into their own pod to avoid inflating your app with code you don't use. Add the following pods to your Podfile...
 
 ```ruby
@@ -87,7 +93,7 @@ Refer to the [Podfile in our example](https://github.com/spokestack/react-native
 
 ### Edit Info.plist
 
-Add the following to your Info.plist to enable permissions.
+Add the following to your Info.plist to enable permissions. Also ensure your iOS deployment target is set to 13.0.
 
 ```
 <key>NSMicrophoneUsageDescription</key>
