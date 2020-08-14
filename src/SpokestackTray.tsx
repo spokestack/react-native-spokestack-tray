@@ -46,8 +46,6 @@ export interface IntentResult {
 }
 
 interface Props {
-  /** Width (and height) of the mic button */
-  buttonWidth?: number
   /**
    * Your Spokestack tokens generated in your Spokestack account
    * at https://spokestack.io/account.
@@ -55,6 +53,22 @@ interface Props {
    */
   clientId: string
   clientSecret: string
+  /**
+   * This function takes an intent from the NLU
+   * and returns an object with a unique conversation
+   * node name (that you define) and a prompt
+   * to be processed by TTS and spoken.
+   *
+   * Note: the prompt is only shown in a chat bubble
+   * if sound has been turned off.
+   */
+  handleIntent: (
+    intent: string,
+    slots?: any,
+    utterance?: string
+  ) => IntentResult
+  /** Width (and height) of the mic button */
+  buttonWidth?: number
   /** How long to wait to close the tray after speaking (ms) */
   closeDelay?: number
   /** Duration for the tray animation (ms) */
@@ -86,20 +100,6 @@ interface Props {
    * Default: false
    */
   greet?: boolean
-  /**
-   * This function takes an intent from the NLU
-   * and returns an object with a unique conversation
-   * node name (that you define) and a prompt
-   * to be processed by TTS and spoken.
-   *
-   * Note: the prompt is only shown in a chat bubble
-   * if sound has been turned off.
-   */
-  handleIntent: (
-    intent: string,
-    slots?: any,
-    utterance?: string
-  ) => IntentResult
   haptic?: boolean
   /** Minimum height for the tray */
   minHeight?: number
@@ -219,8 +219,8 @@ export default class SpokestackTray extends PureComponent<Props, State> {
 
   async componentDidMount() {
     const { clientId, clientSecret } = this.props
-    this.addListeners()
     this.initState()
+    this.addListeners()
     Spokestack.initialize({
       editTranscript: this.props.editTranscript,
       spokestackConfig: {
@@ -239,11 +239,11 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     Spokestack.stop()
   }
 
-  async initState() {
+  private async initState() {
     this.setState({ silent: await getSilent() })
   }
 
-  addListeners() {
+  private addListeners() {
     AppState.addEventListener('change', this.appStateChange)
     Spokestack.addListener(
       Spokestack.ListenerType.CLASSIFICATION,
@@ -262,7 +262,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     Spokestack.addListener(Spokestack.ListenerType.ERROR, this.handleError)
   }
 
-  removeListeners() {
+  private removeListeners() {
     AppState.removeEventListener('change', this.appStateChange)
     Spokestack.removeListener(
       Spokestack.ListenerType.CLASSIFICATION,
@@ -281,7 +281,130 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     Spokestack.removeListener(Spokestack.ListenerType.ERROR, this.handleError)
   }
 
-  greet() {
+  private appStateChange = (nextAppState: AppStateStatus) => {
+    console.log(
+      `App state changed to ${nextAppState}, and wentToBackground is ${this.wentToBackground}`
+    )
+    // Enable/disable wakeword based on app state
+    if (nextAppState === 'active' && this.wentToBackground) {
+      this.wentToBackground = false
+      console.log('App became active. Starting wakeword.')
+      Spokestack.start()
+    } else if (nextAppState === 'background') {
+      this.wentToBackground = true
+      console.log('App went to background. Stopping speech pipeline.')
+      Spokestack.stop()
+    }
+  }
+
+  private handleIntent = ({ result }: SpokestackNLUEvent) => {
+    const { closeDelay, exitNodes, handleIntent, onError } = this.props
+    const { silent } = this.state
+    const response = handleIntent(result.intent, result.slots, this.utterance)
+    const shouldListen = exitNodes.indexOf(response.node) === -1
+    if (response.prompt) {
+      if (silent) {
+        this.addBubble({ text: response.prompt, isLeft: true })
+        if (shouldListen) {
+          setTimeout(Spokestack.listen, 500)
+        } else {
+          setTimeout(this.close, closeDelay)
+        }
+      } else {
+        this.listenWhenDone = shouldListen
+        this.say(response.prompt)
+      }
+    } else if (onError) {
+      onError({
+        type: Spokestack.ListenerType.ERROR,
+        error: 'No prompt returned in the response'
+      })
+    }
+  }
+
+  private userSaid = ({ transcript }: SpokestackRecognizeEvent) => {
+    this.utterance = transcript
+    this.addBubble({ text: transcript, isLeft: false })
+  }
+
+  private listeningStarted = () => {
+    const { haptic } = this.props
+    this.setState({ listening: true, loading: false }, this.open)
+    if (haptic) {
+      HapticFeedback.trigger('impactHeavy', { enableVibrateFallback: true })
+    }
+  }
+
+  private listeningStopped = () => {
+    this.setState({ listening: false })
+  }
+
+  private handleError = (error: Spokestack.ListenerEvent) => {
+    this.setState({ listening: false })
+    this.addBubble({
+      text:
+        'Sorry! We hit an error. Please check your network or restart the app and try again.',
+      isLeft: true
+    })
+    const { onError } = this.props
+    if (onError) {
+      onError(error)
+    }
+  }
+
+  private showHandle = () => {
+    const { buttonWidth, easing, orientation } = this.props
+    Animated.timing(this.panX, {
+      duration: 200,
+      easing,
+      useNativeDriver: true,
+      toValue: (buttonWidth / 2) * (orientation === 'right' ? -1 : 1)
+    }).start()
+    Animated.loop(
+      Animated.timing(this.gradientAnim, {
+        duration: 3000,
+        easing: Easing.linear,
+        isInteraction: false,
+        useNativeDriver: true,
+        toValue: 1
+      })
+    ).start()
+  }
+
+  private onEnd = () => {
+    console.log('onEnd listenWhenDone', this.listenWhenDone)
+    this.setState({ playerSource: null }, () => {
+      if (this.listenWhenDone) {
+        this.listenWhenDone = false
+        Spokestack.listen()
+      } else {
+        setTimeout(this.close, this.props.closeDelay)
+      }
+    })
+  }
+
+  private constrainX = (dx: number) => {
+    const { buttonWidth, orientation } = this.props
+    const closedXValue = buttonWidth / 2
+    if (orientation === 'left') {
+      return Math.min(
+        Math.max(closedXValue, dx),
+        this.windowWidth + closedXValue
+      )
+    }
+    return Math.min(
+      Math.max(-this.windowWidth - closedXValue, dx),
+      -closedXValue
+    )
+  }
+
+  private constrainHeight = (dy: number) => {
+    const { minHeight } = this.props
+    const { startHeight } = this.state
+    return Math.min(Math.max(minHeight, startHeight - dy), this.windowHeight)
+  }
+
+  private greet() {
     const { greet, sayGreeting, handleIntent, onError } = this.props
     if (!greet) {
       return
@@ -303,7 +426,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     }
   }
 
-  async opened() {
+  private async opened() {
     const { greet } = this.props
     const { listening } = this.state
     // Could already be listening in response to wakeword
@@ -372,64 +495,25 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     })
   }
 
+  /**
+   * Open the tray, greet (if applicable), and listen
+   */
   open = () => {
     this.openOrClose(true)
   }
 
+  /**
+   * Close the tray, stop listening, and restart wakeword
+   */
   close = () => {
     this.openOrClose(false)
   }
 
-  showHandle = () => {
-    const { buttonWidth, easing, orientation } = this.props
-    Animated.timing(this.panX, {
-      duration: 200,
-      easing,
-      useNativeDriver: true,
-      toValue: (buttonWidth / 2) * (orientation === 'right' ? -1 : 1)
-    }).start()
-    Animated.loop(
-      Animated.timing(this.gradientAnim, {
-        duration: 3000,
-        easing: Easing.linear,
-        isInteraction: false,
-        useNativeDriver: true,
-        toValue: 1
-      })
-    ).start()
-  }
-
-  listeningStarted = () => {
-    const { haptic } = this.props
-    this.setState({ listening: true, loading: false }, this.open)
-    if (haptic) {
-      HapticFeedback.trigger('impactHeavy', { enableVibrateFallback: true })
-    }
-  }
-
-  listeningStopped = () => {
-    this.setState({ listening: false })
-  }
-
-  toggleSilent = () => {
-    const { playerSource, silent } = this.state
-    if (!silent && playerSource) {
-      this.onEnd()
-    }
-    this.setState({ silent: !silent })
-    return setSilent(!silent)
-  }
-
-  addBubble(bubble: Bubble) {
-    const { bubbles } = this.state
-    // Avoid repeating a bubble
-    const last = bubbles[bubbles.length - 1]
-    if (!last || last.text !== bubble.text || last.isLeft !== bubble.isLeft) {
-      this.setState({ bubbles: bubbles.concat(bubble) })
-    }
-  }
-
-  async say(input: string) {
+  /**
+   * Passes the input to Spokestack.synthesize(),
+   * plays the audio, and adds a speech bubble.
+   */
+  say = async (input: string) => {
     const { onError, ttsFormat: format, voice } = this.props
     // Don't listen for wakeword if we're about to close the tray
     // This also helps with false positives on
@@ -463,96 +547,36 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     })
   }
 
-  userSaid = ({ transcript }: SpokestackRecognizeEvent) => {
-    this.utterance = transcript
-    this.addBubble({ text: transcript, isLeft: false })
-  }
-
-  handleIntent = ({ result }: SpokestackNLUEvent) => {
-    const { closeDelay, exitNodes, handleIntent, onError } = this.props
-    const { silent } = this.state
-    const response = handleIntent(result.intent, result.slots, this.utterance)
-    const shouldListen = exitNodes.indexOf(response.node) === -1
-    if (response.prompt) {
-      if (silent) {
-        this.addBubble({ text: response.prompt, isLeft: true })
-        if (shouldListen) {
-          setTimeout(Spokestack.listen, 500)
-        } else {
-          setTimeout(this.close, closeDelay)
-        }
-      } else {
-        this.listenWhenDone = shouldListen
-        this.say(response.prompt)
-      }
-    } else if (onError) {
-      onError({
-        type: Spokestack.ListenerType.ERROR,
-        error: 'No prompt returned in the response'
-      })
+  /**
+   * Add a bubble (system or user)
+   * to the chat interface
+   */
+  addBubble = (bubble: Bubble) => {
+    const { bubbles } = this.state
+    // Avoid repeating a bubble
+    const last = bubbles[bubbles.length - 1]
+    if (!last || last.text !== bubble.text || last.isLeft !== bubble.isLeft) {
+      this.setState({ bubbles: bubbles.concat(bubble) })
     }
   }
 
-  onEnd = () => {
-    console.log('onEnd listenWhenDone', this.listenWhenDone)
-    this.setState({ playerSource: null }, () => {
-      if (this.listenWhenDone) {
-        this.listenWhenDone = false
-        Spokestack.listen()
-      } else {
-        setTimeout(this.close, this.props.closeDelay)
-      }
-    })
-  }
-
-  handleError = (error: Spokestack.ListenerEvent) => {
-    this.setState({ listening: false })
-    this.addBubble({
-      text:
-        'Sorry! We hit an error. Please check your network or restart the app and try again.',
-      isLeft: true
-    })
-    const { onError } = this.props
-    if (onError) {
-      onError(error)
+  /**
+   * Toggle silent mode
+   */
+  toggleSilent = () => {
+    const { playerSource, silent } = this.state
+    if (!silent && playerSource) {
+      this.onEnd()
     }
+    this.setState({ silent: !silent })
+    return setSilent(!silent)
   }
 
-  private appStateChange = (nextAppState: AppStateStatus) => {
-    console.log(
-      `App state changed to ${nextAppState}, and wentToBackground is ${this.wentToBackground}`
-    )
-    // Enable/disable wakeword based on app state
-    if (nextAppState === 'active' && this.wentToBackground) {
-      this.wentToBackground = false
-      console.log('App became active. Starting wakeword.')
-      Spokestack.start()
-    } else if (nextAppState === 'background') {
-      this.wentToBackground = true
-      console.log('App went to background. Stopping speech pipeline.')
-      Spokestack.stop()
-    }
-  }
-
-  private constrainX = (dx: number) => {
-    const { buttonWidth, orientation } = this.props
-    const closedXValue = buttonWidth / 2
-    if (orientation === 'left') {
-      return Math.min(
-        Math.max(closedXValue, dx),
-        this.windowWidth + closedXValue
-      )
-    }
-    return Math.min(
-      Math.max(-this.windowWidth - closedXValue, dx),
-      -closedXValue
-    )
-  }
-
-  private constrainHeight = (dy: number) => {
-    const { minHeight } = this.props
-    const { startHeight } = this.state
-    return Math.min(Math.max(minHeight, startHeight - dy), this.windowHeight)
+  /**
+   * Returns whether the tray is in silent mode
+   */
+  isSilent = () => {
+    return this.state.silent
   }
 
   render() {

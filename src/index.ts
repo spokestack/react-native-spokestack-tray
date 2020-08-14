@@ -1,4 +1,4 @@
-export * from './Spokestack'
+export { listen, isListening } from './Spokestack'
 
 import SpokestackTray from './SpokestackTray'
 

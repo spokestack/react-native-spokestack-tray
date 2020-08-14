@@ -1,14 +1,11 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "react-native-spokestack-tray": ["./src/index"]
-    },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
+    "baseUrl": ".",
     "esModuleInterop": true,
-    "importsNotUsedAsValues": "error",
     "forceConsistentCasingInFileNames": true,
+    "importsNotUsedAsValues": "error",
     "jsx": "react",
     "lib": ["esnext"],
     "module": "esnext",
@@ -18,10 +15,14 @@
     "noStrictGenericChecks": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "paths": {
+      "react-native-spokestack-tray": ["./src/index"]
+    },
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": false,
-    "target": "esnext"
+    "target": "esnext",
+    "types": ["./types/declaration"]
   }
 }

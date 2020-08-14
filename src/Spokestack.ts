@@ -393,6 +393,17 @@ export function isStarted() {
   return started
 }
 
+/**
+ * Returns whether Spokestack is currently listening with ASR
+ *
+ * ```js
+ * import { isListening } from 'react-native-spokestack-tray'
+ *
+ * if (isListening()) {
+ *   // ...
+ * }
+ * ```
+ */
 export function isListening() {
   return listening
 }
@@ -440,10 +451,74 @@ function queueCommand<T = unknown>(name: string, fn: () => Promise<T>) {
   return promise
 }
 
+/**
+ * Tell Spokestack to start listening.
+ * This will also open the tray.
+ *
+ * ```js
+ * import { initialize, start } from 'react-native-spokestack-tray
+ *
+ * // ...
+ *
+ * componentDidMount() {
+ *   // In most cases, you should call initialize
+ *   // and start together.
+ *   // This will initialize Spokestack and start wakeword.
+ *   initialize().then(start)
+ * }
+ * ```
+ */
 export async function initialize(config: Config) {
   return queueCommand('initialize', init.bind(null, config))
 }
 
+/**
+ * Tell Spokestack to start listening for the wakeword.
+ * When the wakeword is heard, Spokestack will
+ * then start listening using ASR and open the tray.
+ *
+ * ```js
+ * import { listen } from 'react-native-spokestack-tray
+ *
+ * // ...
+ *
+ * listen()
+ * ```
+ */
+export async function start() {
+  await queueCommand('start', startPipeline)
+  return started
+}
+
+/**
+ * Tell Spokestack to stop listening for the wakeword.
+ * Note: this will also stop ASR.
+ *
+ * ```js
+ * import { stop } from 'react-native-spokestack-tray
+ *
+ * // ...
+ *
+ * stop()
+ * ```
+ */
+export async function stop() {
+  await queueCommand('stop', stopPipeline)
+  return !started
+}
+
+/**
+ * Tell Spokestack to start listening.
+ * This will also open the tray.
+ *
+ * ```js
+ * import { listen } from 'react-native-spokestack-tray
+ *
+ * // ...
+ *
+ * await listen()
+ * ```
+ */
 export async function listen() {
   console.log('Listening')
   const permission = await requestSpeech()
@@ -453,22 +528,44 @@ export async function listen() {
   return listening
 }
 
+/**
+ * Tell Spokestack to stop listening with ASR.
+ * Note: this does not stop wakeword (use `stop` for that).
+ *
+ * ```js
+ * import { stopListening } from 'react-native-spokestack-tray
+ *
+ * // ...
+ *
+ * stopListening()
+ * ```
+ */
 export async function stopListening() {
   console.log('Stopping listening')
   await queueCommand('deactivate', deactivate)
   return !listening
 }
 
-export async function start() {
-  await queueCommand('start', startPipeline)
-  return started
-}
-
-export async function stop() {
-  await queueCommand('stop', stopPipeline)
-  return !started
-}
-
+/**
+ * Tell Spokestack to synthesize the text.
+ * This will return an object with a `url` property.
+ * That url can be used to play audio.
+ * The tray handles this automatically by playing the audio
+ *   using react-native-video.
+ * You shouldn't need to call this method directly.
+ * Use the `say` component method instead.
+ * ```js
+ * import { synthesize, TTSFormat } from 'react-native-spokestack-tray
+ *
+ * // ...
+ *
+ * const { url } = await synthesize({
+ *   input: 'This is something to say',
+ *   format: TTSFormat.TEXT,
+ *   voice: 'demo-male'
+ * })
+ * ```
+ */
 export async function synthesize(options?: SynthesizeOptions) {
   return queueCommand('synthesize', synthesizeSpeech.bind(null, options))
 }
