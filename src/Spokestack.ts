@@ -7,6 +7,7 @@ import RNSpokestack, {
 import { checkSpeech, requestSpeech } from './permissions'
 
 import { download } from './Download'
+import map from 'lodash/map'
 import merge from 'lodash/merge'
 import rafForeground from './rafForeground'
 
@@ -112,7 +113,34 @@ function runNativeCommand(
 interface Config {
   /** Edit the transcript before passing it to onRecognize and classify */
   editTranscript?: (transcript: string) => string
+  /** Use this sparingly to refresh the models on device (force overwrite) */
+  refreshModels?: boolean
+  /** Passed straight to react-native-spokestack */
   spokestackConfig?: Partial<SpokestackConfig>
+  /**
+   * Pass the URLs of your NLU model files.
+   * These models will be automatically downloaded
+   * the first time the app opens, and then saved.
+   * This is required for wakeword to work.
+   * See https://spokestack.io/docs/Concepts/wakeword-models
+   */
+  wakewordModelUrls?: {
+    filter: string
+    detect: string
+    encode: string
+  }
+  /**
+   * Pass the URLs of your wakeword model files.
+   * These models will be automatically downloaded
+   * the first time the app opens, and then saved.
+   * This is required for the NLU to work.
+   * See https://spokestack.io/docs/Concepts/nlu
+   */
+  nluModelUrls?: {
+    nlu: string
+    vocab: string
+    metadata: string
+  }
 }
 
 async function init(config: Config = {}) {
@@ -120,63 +148,81 @@ async function init(config: Config = {}) {
     return
   }
   const editTranscript = config.editTranscript || ((transcript) => transcript)
+  let wakewordFiles: string[] = []
+  let nluFiles: string[] = []
 
-  const paths = await Promise.all([
-    download(
-      'https://d3dmqd7cy685il.cloudfront.net/model/wake/bartender/filter.tflite',
-      { id: 'filter' },
-      {
-        forceCellular: true,
-        fetchBlobConfig: { appendExt: 'tflite' }
-      }
-    ),
-    download(
-      'https://d3dmqd7cy685il.cloudfront.net/model/wake/bartender/detect.tflite',
-      { id: 'detect' },
-      {
-        forceCellular: true,
-        fetchBlobConfig: { appendExt: 'tflite' }
-      }
-    ),
-    download(
-      'https://d3dmqd7cy685il.cloudfront.net/model/wake/bartender/encode.tflite',
-      { id: 'encode' },
-      {
-        forceCellular: true,
-        fetchBlobConfig: { appendExt: 'tflite' }
-      }
-    ),
-    download(
-      'https://d3dmqd7cy685il.cloudfront.net/nlu/production/50c99428-28e9-431b-bd8c-999d841b1897/K2VHh5ZepPzjO4AozSs-1KybyeCIauDA5Xp8F0efIys/nlu.tflite',
-      { id: 'nlu' },
-      {
-        forceCellular: true,
-        fetchBlobConfig: { appendExt: 'tflite' }
-      }
-    ),
-    download(
-      'https://d3dmqd7cy685il.cloudfront.net/nlu/production/50c99428-28e9-431b-bd8c-999d841b1897/K2VHh5ZepPzjO4AozSs-1KybyeCIauDA5Xp8F0efIys/vocab.txt',
-      { id: 'vocab' },
-      {
-        forceCellular: true,
-        fetchBlobConfig: { appendExt: 'txt' }
-      }
-    ),
-    download(
-      'https://d3dmqd7cy685il.cloudfront.net/nlu/production/50c99428-28e9-431b-bd8c-999d841b1897/K2VHh5ZepPzjO4AozSs-1KybyeCIauDA5Xp8F0efIys/metadata.json',
-      { id: 'metadata' },
-      {
-        forceCellular: true,
-        fetchBlobConfig: { appendExt: 'json' }
-      }
+  if (config.wakewordModelUrls) {
+    wakewordFiles =
+      (await Promise.all(
+        map(config.wakewordModelUrls, (url, name) =>
+          download(
+            url,
+            { id: name },
+            {
+              forceCellular: true,
+              fetchBlobConfig: {
+                appendExt: 'tflite',
+                overwrite: config.refreshModels
+              }
+            }
+          )
+        )
+      ).catch((error) => {
+        console.error('Failed to download Spokestack model files', error)
+        execute(ListenerType.ERROR, {
+          error: 'Failed to download Spokestack wakeword files'
+        })
+      })) || []
+  } else {
+    console.warn(
+      'No wakeword model URLs provided. Wakeword will not be turned on.'
     )
-  ]).catch((error) => {
-    console.error('Failed to download Spokestack model files', error)
-  })
+  }
 
-  if (!paths || paths.filter((path) => typeof path === 'string').length !== 6) {
-    console.error('Failed to download Spokestack model files', paths)
-    return
+  if (config.nluModelUrls) {
+    nluFiles =
+      (await Promise.all([
+        download(
+          config.nluModelUrls.nlu,
+          { id: 'nlu' },
+          {
+            forceCellular: true,
+            fetchBlobConfig: {
+              appendExt: 'tflite',
+              overwrite: config.refreshModels
+            }
+          }
+        ),
+        download(
+          config.nluModelUrls.vocab,
+          { id: 'vocab' },
+          {
+            forceCellular: true,
+            fetchBlobConfig: {
+              appendExt: 'txt',
+              overwrite: config.refreshModels
+            }
+          }
+        ),
+        download(
+          config.nluModelUrls.metadata,
+          { id: 'metadata' },
+          {
+            forceCellular: true,
+            fetchBlobConfig: {
+              appendExt: 'json',
+              overwrite: config.refreshModels
+            }
+          }
+        )
+      ]).catch((error) => {
+        console.error('Failed to download Spokestack model files', error)
+        execute(ListenerType.ERROR, {
+          error: 'Failed to download Spokestack wakeword files'
+        })
+      })) || []
+  } else {
+    console.warn('No NLU model URLs provided. NLU will not work.')
   }
 
   const spokestackOpts: SpokestackConfig = merge(
@@ -192,9 +238,9 @@ async function init(config: Config = {}) {
       ],
       properties: {
         locale: 'en-US',
-        'wake-filter-path': paths[0] as string,
-        'wake-detect-path': paths[1] as string,
-        'wake-encode-path': paths[2] as string,
+        'wake-filter-path': wakewordFiles[0],
+        'wake-detect-path': wakewordFiles[1],
+        'wake-encode-path': wakewordFiles[2],
         'ans-policy': 'aggressive',
         'agc-target-level-dbfs': 3,
         'agc-compression-gain-db': 15,
@@ -213,9 +259,9 @@ async function init(config: Config = {}) {
         ttsServiceClass: 'io.spokestack.spokestack.tts.SpokestackTTSService'
       },
       nlu: {
-        'nlu-model-path': paths[3] as string,
-        'wordpiece-vocab-path': paths[4] as string,
-        'nlu-metadata-path': paths[5] as string
+        'nlu-model-path': nluFiles[0] as string,
+        'wordpiece-vocab-path': nluFiles[1] as string,
+        'nlu-metadata-path': nluFiles[2] as string
       }
     },
     config.spokestackConfig

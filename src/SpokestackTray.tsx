@@ -103,11 +103,30 @@ interface Props {
   haptic?: boolean
   /** Minimum height for the tray */
   minHeight?: number
+  /**
+   * Pass the URLs of your NLU model files.
+   * These models will be automatically downloaded
+   * the first time the app opens, and then saved.
+   * This is required for the NLU to work.
+   * See https://spokestack.io/docs/Concepts/nlu
+   */
+  nluModelUrls?: {
+    nlu: string
+    vocab: string
+    metadata: string
+  }
   onClose?: () => void
   onError?: (e: Spokestack.ListenerEvent) => void
   onOpen?: () => void
   orientation?: 'left' | 'right'
   primaryColor?: string
+  /**
+   * Use this sparingly to refresh the
+   * wakeword and NLU models on device
+   * (force overwrite).
+   * `<SpokestackTray refreshModels={process.env.NODE_ENV !== 'production'} ... />`
+   */
+  refreshModels?: boolean
   /**
    * Whether to speak the greeting or only display
    * a chat bubble with the greet message,
@@ -121,6 +140,18 @@ interface Props {
   ttsFormat?: TTSFormat
   /** A key for a voice in Spokestack ASR. Default: 'demo-male' */
   voice?: string
+  /**
+   * Pass the URLs of your wakeword model files.
+   * These models will be automatically downloaded
+   * the first time the app opens, and then saved.
+   * This is required for wakeword to work.
+   * See https://spokestack.io/docs/Concepts/wakeword-models
+   */
+  wakewordModelUrls?: {
+    filter: string
+    detect: string
+    encode: string
+  }
 }
 
 interface State {
@@ -218,11 +249,20 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   }
 
   async componentDidMount() {
-    const { clientId, clientSecret } = this.props
+    const {
+      clientId,
+      clientSecret,
+      refreshModels,
+      wakewordModelUrls,
+      nluModelUrls
+    } = this.props
     this.initState()
     this.addListeners()
     Spokestack.initialize({
       editTranscript: this.props.editTranscript,
+      nluModelUrls,
+      refreshModels,
+      wakewordModelUrls,
       spokestackConfig: {
         tts: {
           'spokestack-id': clientId,

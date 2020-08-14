@@ -128,7 +128,7 @@ export async function download(
   url: string,
   file: Omit<File, 'filename'>,
   options: DownloadOptions = {}
-): Promise<string | void> {
+): Promise<string> {
   if (typeof url !== 'string') {
     return Promise.reject(new Error('url argument is required for downloading'))
   }
