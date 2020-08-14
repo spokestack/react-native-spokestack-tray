@@ -101,6 +101,8 @@ data += trayProps
       ? `${all} (Default: **${parsedDefaults[key]}**)`
       : all
   })
+  .replace(/IntentResult/g, '[IntentResult](#IntentResult)')
+  .replace(/ListenerEvent/g, '[ListenerEvent](#ListenerEvent)')
 
 // Add IntentResult definition
 data += '\n---\n\n#### `IntentResult`\n'
@@ -123,6 +125,7 @@ getInterfaceContent('_src_spokestack_.listenerevent.md').replace(
     data += `\n${all}\n`
   }
 )
+
 // Add ListenerType enum
 data += '\n---\n\n#### `ListenerType` enum\n'
 data += '`ListenerType` is used in `ListenerEvent`\n'
