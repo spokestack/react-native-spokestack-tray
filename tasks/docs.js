@@ -28,7 +28,7 @@ function getClassMethods(filename, methods) {
     .map((method) => {
       const rmethod = new RegExp(`#\\s*(${method}[\\w\\W]+?)##`)
       const match = rmethod.exec(fileData)
-      return match ? `##### ${match[1]}` : ''
+      return match ? `### ${match[1]}` : ''
     })
     .join('\n\n')
 }
@@ -37,7 +37,7 @@ function getInterfaceContent(filename) {
   return redoLinks(read(`../docs/interfaces/${filename}`))
     .replace(/[\w\W]+##\s*Properties/, '')
     .replace(/___/g, '')
-    .replace(/\n### /g, '\n#### ')
+    .replace(/\n### /g, '\n### ')
 }
 
 /**
@@ -52,7 +52,7 @@ function getModuleFunctions(filename, functions) {
     .map((fn) => {
       const rfn = new RegExp(`#\\s*(${fn}[\\w\\W]+?)##`)
       const match = rfn.exec(fileData)
-      return match ? `##### ${match[1]}` : ''
+      return match ? `### ${match[1]}` : ''
     })
     .join('\n\n')
 }
