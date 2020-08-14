@@ -25,11 +25,10 @@
     "!**/__tests__",
     "!**/__fixtures__",
     "!**/__mocks__",
-    "android",
-    "ios",
-    "cpp",
-    "react-native-spokestack-tray.podspec",
-    "!lib/typescript/example"
+    "!lib/typescript/example",
+    "LICENSE",
+    "CONTRIBUTING.md",
+    "README.md"
   ],
   "keywords": [
     "react-native",
