@@ -24,11 +24,12 @@ function getClassMethods(filename, methods) {
   const fileData = redoLinks(read(`../docs/classes/${filename}`))
     // Remove everything up to methods
     .replace(/[\w\W]+#{2}\s*Methods/, '')
+    .replace(/___/g, '')
   return methods
     .map((method) => {
       const rmethod = new RegExp(`#\\s*(${method}[\\w\\W]+?)##`)
       const match = rmethod.exec(fileData)
-      return match ? `### ${match[1]}` : ''
+      return match ? `\n---\n### ${match[1]}` : ''
     })
     .join('\n\n')
 }
@@ -55,17 +56,18 @@ function getModuleFunctions(filename, functions) {
   const fileData = redoLinks(read(`../docs/modules/${filename}`))
     // Remove everything up to functions
     .replace(/[\w\W]+#{2}\s*Functions/, '')
+    .replace(/___/g, '')
   return functions
     .map((fn) => {
       const rfn = new RegExp(`#\\s*(${fn}[\\w\\W]+?)##`)
       const match = rfn.exec(fileData)
-      return match ? `### ${match[1]}` : ''
+      return match ? `\n---\n### ${match[1]}` : ''
     })
     .join('\n\n')
 }
 
 const rprops = /\*\*(\w+)\*\*\??\s*: \*\w+\*/g
-const rdefaultProps = /\*\*(\w+)\*\*: (?:\*\w+\* )?= (["\w-.]+)/g
+const rdefaultProps = /\*\*(\w+)\*\*: (?:\*\w+?\* )?= (["\w-.]+)/g
 
 // Start with the README
 const header = '\n---\n\n# Documentation'
@@ -91,7 +93,7 @@ defaultOptions.replace(rdefaultProps, function (all, key, value) {
   return all
 })
 const trayProps = getInterfaceContent('_src_spokestacktray_.props.md')
-data += '\n\n## SpokestackTray Component Props'
+data += '\n---\n\n## SpokestackTray Component Props'
 data += trayProps
   // Add in default values to option descriptions
   .replace(rprops, function (all, key) {
@@ -154,13 +156,24 @@ data += getClassMethods('_src_spokestacktray_.spokestacktray.md', [
   'open',
   'close',
   'say',
-  'addBubble',
+  'addBubble'
+])
+
+// Add Bubble definition
+data += '\n#### `Bubble`\n'
+getInterfaceContent('_src_speechbubbles_.bubble.md').replace(rprops, function (
+  all
+) {
+  data += `\n${all}\n`
+})
+
+data += getClassMethods('_src_spokestacktray_.spokestacktray.md', [
   'toggleSilent',
   'isSilent'
 ])
 
 // Add license info
-data += '\n\n ## License\n\nMIT\n'
+data += '\n---\n\n ## License\n\nMIT\n'
 
 // Write a pretty version
 write(
