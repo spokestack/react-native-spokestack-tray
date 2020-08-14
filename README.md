@@ -6,6 +6,14 @@ A React Native component for adding Spokestack to any React Native app
 
 Install this library with the peer dependencies
 
+A one-linear to install all dependencies
+
+```sh
+npm install react-native-spokestack-tray react-native-spokestack @react-native-community/async-storage @react-native-community/netinfo react-native-video rn-fetch-blob react-native-haptic-feedback react-native-linear-gradient react-native-permissions
+```
+
+Each dependency by its usage.
+
 ```sh
 $ npm install react-native-spokestack-tray react-native-spokestack
 
@@ -34,12 +42,6 @@ $ npm install react-native-permissions
 # Used to generate a haptic whenever Spokestack listens.
 # This can be turned off, but the dependency is still needed.
 $ npm install react-native-haptic-feedback
-```
-
-A one-linear to install all dependencies
-
-```sh
-npm install react-native-spokestack-tray react-native-spokestack @react-native-community/async-storage @react-native-community/netinfo react-native-video rn-fetch-blob react-native-haptic-feedback react-native-linear-gradient react-native-permissions
 ```
 
 Do not run `pod install` yet.
