@@ -48,7 +48,7 @@ Do not run `pod install` yet.
 
 ### Edit Podfile
 
-Our main dependency (react-native-spokestack) makes use of advanced APIs only available in iOS 13+. Make sure to set your deployment target to iOS 13, and set the following
+Our main dependency (react-native-spokestack) makes use of relatively new APIs only available in iOS 13+. Make sure to set your deployment target to iOS 13, and set the following
 
 ```ruby
 platform :ios, '13.0'
