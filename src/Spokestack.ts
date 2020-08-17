@@ -228,9 +228,10 @@ async function init(config: Config = {}) {
         })
       })) || []
   } else {
-    console.warn(
-      'No NLU model URLs provided. ASR will work, but without NLU. See https://spokestack.io/docs/Concepts/nlu for details.'
+    console.error(
+      'No NLU model URLs provided. An NLU is required to process speech. See https://spokestack.io/docs/Concepts/nlu for details.'
     )
+    return
   }
 
   const spokestackOpts: SpokestackConfig = merge(
@@ -267,9 +268,9 @@ async function init(config: Config = {}) {
         ttsServiceClass: 'io.spokestack.spokestack.tts.SpokestackTTSService'
       },
       nlu: {
-        'nlu-model-path': nluFiles[0] as string,
-        'wordpiece-vocab-path': nluFiles[1] as string,
-        'nlu-metadata-path': nluFiles[2] as string
+        'nlu-model-path': nluFiles[0],
+        'wordpiece-vocab-path': nluFiles[1],
+        'nlu-metadata-path': nluFiles[2]
       }
     },
     config.spokestackConfig
@@ -523,7 +524,8 @@ function queueCommand<T = unknown>(name: string, fn: () => Promise<T>) {
  * ```
  */
 export async function initialize(config: Config) {
-  return queueCommand('initialize', init.bind(null, config))
+  await queueCommand('initialize', init.bind(null, config))
+  return initialized
 }
 
 /**
