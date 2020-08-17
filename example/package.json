@@ -15,6 +15,7 @@
   "dependencies": {
     "@react-native-community/async-storage": "^1.11.0",
     "@react-native-community/netinfo": "^5.9.6",
+    "babel-plugin-transform-inline-environment-variables": "^0.4.3",
     "react": "16.13.1",
     "react-native": "0.63.2",
     "react-native-haptic-feedback": "^1.10.0",

@@ -3,17 +3,23 @@ import * as React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 import SpokestackTray from 'react-native-spokestack-tray'
-import handleIntent from './Dialogue'
+import handleIntent from './handleIntent'
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Spokestack Example App (Minecraft)</Text>
-      <Text style={styles.instructions}>
-        Slide the tray open (➜) or say "Spokestack"
-      </Text>
-      <Text style={styles.start}>Then say "Help"</Text>
+      <View style={styles.content}>
+        <Text style={styles.header}>Spokestack Example App (Minecraft)</Text>
+        <Text style={styles.instructions}>Slide the tray open (➜)</Text>
+        <Text style={styles.wakeword}>
+          After you've given the tray microphone permission, say "Spokestack" to
+          open the tray again.
+        </Text>
+      </View>
+      {/* The tray should be added outside any navigation containers */}
       <SpokestackTray
+        clientId={process.env.SPOKESTACK_CLIENT_ID}
+        clientSecret={process.env.SPOKESTACK_CLIENT_SECRET}
         greet
         exitNodes={['exit']}
         handleIntent={handleIntent}
@@ -33,8 +39,12 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'flex-start',
+    paddingTop: 100,
+    alignItems: 'center'
+  },
+  content: {
+    padding: 20
   },
   header: {
     fontSize: 32,
@@ -48,6 +58,9 @@ const styles = StyleSheet.create({
   },
   start: {
     fontSize: 22,
+    textAlign: 'center'
+  },
+  wakeword: {
     textAlign: 'center'
   }
 })

@@ -9,7 +9,7 @@ import type { IntentResult } from 'react-native-spokestack-tray'
 const greeting = {
   node: 'greeting',
   prompt:
-    'Welcome to Spokestack! This example uses models for Minecraft. Try saying, "How do I make a castle?"'
+    'Welcome! This example uses models for Minecraft. Try saying, "How do I make a castle?"'
 }
 
 let lastNode: IntentResult = greeting
@@ -27,13 +27,13 @@ export default function handleIntent(
     case 'AMAZON.YesIntent':
       lastNode = {
         node: 'search',
-        prompt: 'I heard you say Yes! What would you like to make?'
+        prompt: 'I heard you say yes! What would you like to make?'
       }
       return lastNode
     case 'AMAZON.NoIntent':
       lastNode = {
         node: 'exit',
-        prompt: 'I heard you say No.'
+        prompt: 'I heard you say no. Goodbye.'
       }
       return lastNode
     case 'AMAZON.StopIntent':

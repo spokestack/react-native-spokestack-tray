@@ -228,9 +228,10 @@ async function init(config: Config = {}) {
         })
       })) || []
   } else {
-    console.error(
+    const error =
       'No NLU model URLs provided. An NLU is required to process speech. See https://spokestack.io/docs/Concepts/nlu for details.'
-    )
+    console.error(error)
+    execute(ListenerType.ERROR, { error })
     return
   }
 
@@ -275,6 +276,18 @@ async function init(config: Config = {}) {
     },
     config.spokestackConfig
   )
+
+  // Check for Spokestack client ID and secret
+  if (
+    !spokestackOpts.tts['spokestack-id'] ||
+    !spokestackOpts.tts['spokestack-secret']
+  ) {
+    const error =
+      'Spokestack client ID and secret are required. Go to https://spokestack.io/account to create a free token.'
+    console.error(error)
+    execute(ListenerType.ERROR, { error })
+    return
+  }
 
   RNSpokestack.onInit = (e) => {
     console.log('[Spokestack onInit]:', JSON.stringify(e))

@@ -6,7 +6,7 @@
   "module": "lib/module/index.js",
   "types": "lib/typescript/src/index.d.ts",
   "react-native": "src/index.ts",
-  "source": "src/index",
+  "source": "src/index.ts",
   "scripts": {
     "bootstrap": "npm install && npm run example && npm run pods",
     "docs": "typedoc --excludePrivate --tsconfig tsconfig.typedoc.json --plugin typedoc-plugin-markdown --hideBreadcrumbs --out docs --readme none src/index.ts && node tasks/docs.js",
