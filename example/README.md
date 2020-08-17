@@ -1,5 +1,7 @@
 # react-native-spokestack-tray example app
 
+![Example app](./tray_example.gif)
+
 ## Running this example
 
 To run this app, first install dependencies...
