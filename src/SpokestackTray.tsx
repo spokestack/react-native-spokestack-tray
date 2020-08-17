@@ -662,8 +662,8 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       gradientColors,
       orientation,
       primaryColor,
-      soundOnImage,
-      soundOffImage,
+      soundOnImage: soundOn,
+      soundOffImage: soundOff,
       style
     } = this.props
     const {
@@ -836,11 +836,11 @@ export default class SpokestackTray extends PureComponent<Props, State> {
                   style={[styles.headerButton, styles.silentButton]}
                   onPress={this.toggleSilent}
                 >
-                  {silent ? soundOffImage : soundOnImage}
+                  {silent ? soundOff : soundOn}
                 </TouchableOpacity>
               </View>
               <SpeechBubbles
-                backgroundSystem={Color(primaryColor).lighten(0.6).toString()}
+                backgroundSystem={Color(primaryColor).fade(0.9).toString()}
                 bubbles={bubbles}
                 bubbleTextStyle={{ fontFamily }}
                 listening={listening}
