@@ -169,6 +169,10 @@ interface Props {
    * Default: true
    */
   sayGreeting?: boolean
+  /** Replace the sound on image by passing an <Image /> */
+  soundOnImage?: React.ReactNode
+  /** Replace the sound off image by passing an <Image /> */
+  soundOffImage?: React.ReactNode
   /** Starting height for tray */
   startHeight?: number
   /** This style prop is passed to the tray's container */
@@ -254,8 +258,14 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     haptic: true,
     minHeight: 170,
     orientation: 'left',
-    primaryColor: '#d83e68',
+    primaryColor: '#2f5bea',
     sayGreeting: true,
+    soundOnImage: (
+      <Image source={soundOnImage} style={{ width: 30, height: 30 }} />
+    ),
+    soundOffImage: (
+      <Image source={soundOffImage} style={{ width: 30, height: 30 }} />
+    ),
     startHeight: 220,
     ttsFormat: TTSFormat.TEXT,
     voice: 'demo-male'
@@ -648,9 +658,12 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   render() {
     const {
       buttonWidth,
+      fontFamily,
       gradientColors,
       orientation,
       primaryColor,
+      soundOnImage,
+      soundOffImage,
       style
     } = this.props
     const {
@@ -793,10 +806,14 @@ export default class SpokestackTray extends PureComponent<Props, State> {
                   </Animated.View>
                   {listening ? (
                     <>
-                      <Text style={styles.listeningText}>LISTENING ...</Text>
+                      <Text style={[styles.listeningText, { fontFamily }]}>
+                        LISTENING ...
+                      </Text>
                     </>
                   ) : loading ? (
-                    <Text style={styles.listeningText}>LOADING ...</Text>
+                    <Text style={[styles.listeningText, { fontFamily }]}>
+                      LOADING ...
+                    </Text>
                   ) : null}
                 </View>
                 <TouchableOpacity
@@ -819,13 +836,15 @@ export default class SpokestackTray extends PureComponent<Props, State> {
                   style={[styles.headerButton, styles.silentButton]}
                   onPress={this.toggleSilent}
                 >
-                  <Image
-                    source={silent ? soundOffImage : soundOnImage}
-                    style={styles.sound}
-                  />
+                  {silent ? soundOffImage : soundOnImage}
                 </TouchableOpacity>
               </View>
-              <SpeechBubbles bubbles={bubbles} listening={listening} />
+              <SpeechBubbles
+                backgroundSystem={Color(primaryColor).lighten(0.6).toString()}
+                bubbles={bubbles}
+                bubbleTextStyle={{ fontFamily }}
+                listening={listening}
+              />
 
               <View style={styles.powered} pointerEvents="none">
                 <Image source={poweredImage} style={styles.poweredImage} />
@@ -926,10 +945,6 @@ const styles = StyleSheet.create({
   arrow: {
     width: 14,
     height: 14
-  },
-  sound: {
-    width: 30,
-    height: 30
   },
   mic: {
     width: 20,

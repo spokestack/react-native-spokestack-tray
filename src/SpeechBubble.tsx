@@ -1,8 +1,11 @@
 import { StyleSheet, Text, TextProps, View, ViewProps } from 'react-native'
 
+import Color from 'color'
 import React from 'react'
 
 interface Props {
+  backgroundSystem?: string
+  backgroundUser?: string
   isLeft?: boolean
   style?: ViewProps['style']
   textStyle?: TextProps['style']
@@ -10,6 +13,8 @@ interface Props {
 }
 
 export default function SpeechBubble({
+  backgroundSystem = Color('#2f5bea').lighten(0.6).toString(),
+  backgroundUser = '#f9f9f9',
   isLeft = false,
   style,
   text,
@@ -24,11 +29,11 @@ export default function SpeechBubble({
         styles.bubble,
         isLeft
           ? {
-              backgroundColor: '#fcf1f4',
+              backgroundColor: backgroundSystem,
               alignSelf: 'flex-start'
             }
           : {
-              backgroundColor: '#f9f9f9',
+              backgroundColor: backgroundUser,
               alignSelf: 'flex-end'
             },
         style
