@@ -113,7 +113,7 @@
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "pre-commit": "concurrently --raw \"npm run lint\" \"npm run typescript\""
+      "pre-commit": "concurrently --raw \"npm run lint\" \"npm run typescript\" && npm run docs && git add README.md"
     }
   },
   "commitlint": {

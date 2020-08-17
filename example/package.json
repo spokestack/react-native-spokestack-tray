@@ -5,8 +5,10 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
+    "android:log": "react-native log-android",
     "dev": "react-native start --reset-cache",
     "ios": "react-native run-ios",
+    "ios:log": "react-native log-ios",
     "pods": "npx pod-install",
     "start": "react-native start"
   },

@@ -50,8 +50,15 @@ interface Props {
    * Your Spokestack tokens generated in your Spokestack account
    * at https://spokestack.io/account.
    * Create an account for free then generate a token.
+   * This is from the "ID" field.
    */
   clientId: string
+  /**
+   * Your Spokestack tokens generated in your Spokestack account
+   * at https://spokestack.io/account.
+   * Create an account for free then generate a token.
+   * This is from the "secret" field.
+   */
   clientSecret: string
   /**
    * This function takes an intent from the NLU
@@ -100,11 +107,15 @@ interface Props {
    * Default: false
    */
   greet?: boolean
+  /**
+   * Set this to false to disable the haptic
+   * that gets played whenever the tray starts listening.
+   */
   haptic?: boolean
   /** Minimum height for the tray */
   minHeight?: number
   /**
-   * Pass the URLs of your NLU model files.
+   * The URLs of your NLU model files.
    * These models will be automatically downloaded
    * the first time the app opens, and then saved.
    * This is required for the NLU to work.
@@ -115,10 +126,22 @@ interface Props {
     vocab: string
     metadata: string
   }
+  /**
+   * Called whenever the tray has closed
+   */
   onClose?: () => void
+  /** Called whenever there's an error from Spokestack */
   onError?: (e: Spokestack.ListenerEvent) => void
+  /** Called whenever the tray has opened */
   onOpen?: () => void
+  /**
+   * The tray button can be oriented on either side of the screen
+   */
   orientation?: 'left' | 'right'
+  /**
+   * This color is used to theme the tray
+   * and is used in the mic button and speech bubbles.
+   */
   primaryColor?: string
   /**
    * Use this sparingly to refresh the
@@ -136,12 +159,14 @@ interface Props {
   sayGreeting?: boolean
   /** Starting height for tray */
   startHeight?: number
+  /** This style prop is passed to the tray's container */
   style?: Animated.WithAnimatedValue<StyleProp<ViewStyle>>
+  /** The format for the text passed to Spokestack.synthesize */
   ttsFormat?: TTSFormat
-  /** A key for a voice in Spokestack ASR. Default: 'demo-male' */
+  /** A key for a voice in Spokestack ASR, passed to Spokestack.synthesize */
   voice?: string
   /**
-   * Pass the URLs of your wakeword model files.
+   * The URLs of your wakeword model files.
    * These models will be automatically downloaded
    * the first time the app opens, and then saved.
    * This is required for wakeword to work.
@@ -258,7 +283,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     } = this.props
     this.initState()
     this.addListeners()
-    Spokestack.initialize({
+    const initialized = await Spokestack.initialize({
       editTranscript: this.props.editTranscript,
       nluModelUrls,
       refreshModels,
@@ -270,8 +295,9 @@ export default class SpokestackTray extends PureComponent<Props, State> {
         }
       }
     })
-      .then(Spokestack.start)
-      .then(this.showHandle)
+    if (initialized) {
+      Spokestack.start().then(this.showHandle)
+    }
   }
 
   componentWillUnmount() {
