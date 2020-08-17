@@ -805,11 +805,9 @@ export default class SpokestackTray extends PureComponent<Props, State> {
                     />
                   </Animated.View>
                   {listening ? (
-                    <>
-                      <Text style={[styles.listeningText, { fontFamily }]}>
-                        LISTENING ...
-                      </Text>
-                    </>
+                    <Text style={[styles.listeningText, { fontFamily }]}>
+                      LISTENING ...
+                    </Text>
                   ) : loading ? (
                     <Text style={[styles.listeningText, { fontFamily }]}>
                       LOADING ...
