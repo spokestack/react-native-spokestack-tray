@@ -481,13 +481,14 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   }
 
   private greet() {
-    const { greet, sayGreeting, handleIntent, onError } = this.props
+    const { greet, handleIntent, onError, sayGreeting } = this.props
+    const { silent } = this.state
     if (!greet) {
       return
     }
     const response = handleIntent('greet')
     if (response.prompt) {
-      if (sayGreeting) {
+      if (sayGreeting && !silent) {
         this.listenWhenDone = true
         this.say(response.prompt)
       } else {
