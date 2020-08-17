@@ -172,9 +172,6 @@
       "@release-it/conventional-changelog": {
         "preset": "angular"
       }
-    },
-    "hooks": {
-      "after:bump": "npm run docs"
     }
   }
 }
