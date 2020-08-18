@@ -10,25 +10,9 @@ To get started with the project, run `npm run bootstrap` in the root directory t
 npm run bootstrap
 ```
 
-While developing, you can run the [example app](/example/) to test your changes.
+While developing, you can run the [example app](./example/) to test your changes.
 
-To start the packager:
-
-```sh
-$ cd example && npm start
-```
-
-To run the example app on Android:
-
-```sh
-$ cd example && npm run android
-```
-
-To run the example app on iOS:
-
-```sh
-$ cd example && npm run ios
-```
+See the [example app's README](./example/README.md) for instructions on how to run it.
 
 Make sure your code passes TypeScript and ESLint. Run the following to verify:
 
