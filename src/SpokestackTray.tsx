@@ -111,6 +111,7 @@ interface Props {
   fontFamily?: string
   /**
    * Colors for the linear gradient shown when listening
+   * Can be any number of colors (recommended: 2-3)
    */
   gradientColors?: string[]
   /**
@@ -253,7 +254,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     closeDelay: 0,
     duration: 500,
     easing: Easing.bezier(0.77, 0.41, 0.2, 0.84),
-    gradientColors: ['#d83e68', '#fc00ff', '#00dbde'],
+    gradientColors: ['#61fae9', '#2F5BEA'],
     greet: false,
     haptic: true,
     minHeight: 170,
@@ -919,7 +920,7 @@ const styles = StyleSheet.create({
   },
   gradientWrap: {
     position: 'absolute',
-    top: 0,
+    top: -1,
     width: '300%',
     right: 0,
     height: 7,
