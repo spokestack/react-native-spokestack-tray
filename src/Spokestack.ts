@@ -572,7 +572,7 @@ export async function start() {
  * ```
  */
 export async function stop() {
-  await queueCommand('stop', stopPipeline)
+  await stopPipeline()
   return !started
 }
 
