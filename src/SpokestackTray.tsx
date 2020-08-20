@@ -547,11 +547,11 @@ export default class SpokestackTray extends PureComponent<Props, State> {
         useNativeDriver: true,
         toValue: shouldOpen ? 0.25 : 0
       })
-    ]).start(async () => {
+    ]).start(() => {
       const { onOpen, onClose } = this.props
+      this.setState({ open: shouldOpen })
       if (shouldOpen) {
         Keyboard.dismiss()
-        this.setState({ open: shouldOpen })
         // Check here as well as it could
         // have tried to start listening
         // and then stopped due to error
@@ -577,6 +577,10 @@ export default class SpokestackTray extends PureComponent<Props, State> {
    * Open the tray, greet (if applicable), and listen
    */
   open = () => {
+    const { open } = this.state
+    if (open) {
+      return
+    }
     this.openOrClose(true)
   }
 
@@ -584,6 +588,10 @@ export default class SpokestackTray extends PureComponent<Props, State> {
    * Close the tray, stop listening, and restart wakeword
    */
   close = () => {
+    const { open } = this.state
+    if (!open) {
+      return
+    }
     this.openOrClose(false)
   }
 
