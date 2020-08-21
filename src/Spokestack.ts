@@ -601,7 +601,7 @@ export async function listen() {
  * Tell Spokestack to stop listening with ASR.
  *
  * ```js
- * import { stopListening } from 'react-native-spokestack-tray
+ * import { stopListening } from 'react-native-spokestack-tray'
  *
  * // ...
  *
