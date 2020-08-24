@@ -10,6 +10,7 @@ import {
   GestureResponderEvent,
   Image,
   Keyboard,
+  LayoutChangeEvent,
   PanResponder,
   PanResponderGestureState,
   SafeAreaView,
@@ -127,6 +128,8 @@ interface Props {
   haptic?: boolean
   /** Minimum height for the tray */
   minHeight?: number
+  /** Height of the minimized bar */
+  minimizedHeight?: number
   /**
    * The URLs of your NLU model files.
    * These models will be automatically downloaded
@@ -176,7 +179,12 @@ interface Props {
   soundOffImage?: React.ReactNode
   /** Starting height for tray */
   startHeight?: number
-  /** This style prop is passed to the tray's container */
+  /**
+   * This style prop is passed to the tray's content container.
+   * Note: this is not the same at the top-most container,
+   *   which is the animated view responsible for animations
+   *   and gestures and should not get other styles.
+   */
   style?: Animated.WithAnimatedValue<StyleProp<ViewStyle>>
   /** The format for the text passed to Spokestack.synthesize */
   ttsFormat?: TTSFormat
@@ -186,21 +194,23 @@ interface Props {
 
 interface State {
   bubbles: Bubble[]
-  height: number
   listening: boolean
   loading: boolean
+  minimized: boolean
   open: boolean
   playerSource: string
   pressed: boolean
   silent: boolean
-  startHeight: number
 }
 
 export default class SpokestackTray extends PureComponent<Props, State> {
   private wentToBackground: boolean
   private windowWidth = Dimensions.get('window').width
   private windowHeight: number
-  private panX = new Animated.Value(0)
+  private currentHeight: number // Current height of the container, even during animation
+  private startHeight: number // Saved starting height for the move event
+  private height: Animated.Value
+  private panX: Animated.Value
   private shadowOpacity = new Animated.Value(0)
   private gradientAnim = new Animated.Value(0)
   private listenWhenDone = false
@@ -209,22 +219,22 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: () => true,
     onPanResponderGrant: () => {
-      const { height } = this.state
-      this.setState({ pressed: true, startHeight: height })
+      this.setState({ pressed: true })
       const { width: windowWidth, height: windowHeight } = Dimensions.get(
         'window'
       )
       this.windowWidth = windowWidth
       this.windowHeight = windowHeight
+      this.startHeight = this.currentHeight
     },
     onPanResponderMove: (_event, { dx, dy }) => {
+      this.height.setValue(this.constrainHeight(dy))
       this.panX.setValue(this.constrainX(dx))
-      this.setState({ height: this.constrainHeight(dy) })
     },
     onPanResponderRelease: (_event, { dx, dy }) => {
       const { orientation } = this.props
       const shouldOpen =
-        (Math.abs(dx) < 2 && Math.abs(dy) < 2) ||
+        (Math.abs(dx) < 10 && Math.abs(dy) < 10) ||
         (orientation === 'left'
           ? dx > this.windowWidth / 3
           : dx < -this.windowWidth / 3)
@@ -237,15 +247,28 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   private expandPanResponder = PanResponder.create({
     onMoveShouldSetPanResponder: () => true,
     onPanResponderGrant: () => {
-      const { height } = this.state
-      this.setState({ startHeight: height })
+      this.startHeight = this.currentHeight
       this.windowHeight = Dimensions.get('window').height
     },
     onPanResponderMove: (
       _event: GestureResponderEvent,
       { dy }: PanResponderGestureState
     ) => {
-      this.setState({ height: this.constrainHeight(dy) })
+      this.height.setValue(this.constrainHeight(dy))
+    },
+    onPanResponderRelease: (_event, { dy }) => {
+      const { minHeight } = this.props
+      const { minimized } = this.state
+      if (minimized && Math.abs(dy) < 10) {
+        Spokestack.listen()
+        this.minimize()
+      } else if (this.currentHeight < minHeight) {
+        console.log('Minimizing', this.currentHeight)
+        this.minimize()
+      } else {
+        console.log('Unminimizing', this.currentHeight, minHeight)
+        this.unminimize()
+      }
     }
   })
 
@@ -257,7 +280,8 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     gradientColors: ['#61fae9', '#2F5BEA'],
     greet: false,
     haptic: true,
-    minHeight: 170,
+    minHeight: 180,
+    minimizedHeight: 44,
     orientation: 'left',
     primaryColor: '#2f5bea',
     sayGreeting: true,
@@ -274,14 +298,21 @@ export default class SpokestackTray extends PureComponent<Props, State> {
 
   state: State = {
     bubbles: [],
-    height: this.props.startHeight,
     listening: false,
     loading: false,
+    minimized: false,
     open: false,
     playerSource: '',
     pressed: false,
-    silent: false,
-    startHeight: this.props.startHeight
+    silent: false
+  }
+
+  constructor(props: Props) {
+    super(props)
+    const { minimized } = this.state
+    // Start at 0 if minized and animate up
+    this.height = new Animated.Value(minimized ? 0 : props.startHeight)
+    this.panX = new Animated.Value(minimized ? this.getOpenX() : 0)
   }
 
   async componentDidMount() {
@@ -307,7 +338,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       }
     })
     if (initialized) {
-      Spokestack.start().then(this.showHandle)
+      Spokestack.start().then(this.bootstrap)
     }
   }
 
@@ -429,23 +460,46 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     }
   }
 
-  private showHandle = () => {
+  private showHandle() {
     const { buttonWidth, easing, orientation } = this.props
     Animated.timing(this.panX, {
       duration: 200,
       easing,
-      useNativeDriver: true,
+      useNativeDriver: false,
       toValue: (buttonWidth / 2) * (orientation === 'right' ? -1 : 1)
     }).start()
+  }
+
+  private animateGradient() {
     Animated.loop(
       Animated.timing(this.gradientAnim, {
         duration: 3000,
         easing: Easing.linear,
         isInteraction: false,
-        useNativeDriver: true,
+        useNativeDriver: false,
         toValue: 1
       })
     ).start()
+  }
+
+  private showMinimized() {
+    const { duration, easing, minimizedHeight } = this.props
+    Animated.timing(this.height, {
+      duration,
+      easing,
+      useNativeDriver: false,
+      toValue: minimizedHeight
+    }).start()
+  }
+
+  private bootstrap = () => {
+    const { minimized } = this.state
+    if (minimized) {
+      this.showMinimized()
+    } else {
+      this.showHandle()
+    }
+    this.animateGradient()
   }
 
   private onEnd = () => {
@@ -458,6 +512,24 @@ export default class SpokestackTray extends PureComponent<Props, State> {
         setTimeout(this.close, this.props.closeDelay)
       }
     })
+  }
+
+  private setCurrentHeight = ({ nativeEvent }: LayoutChangeEvent) => {
+    this.currentHeight = nativeEvent.layout.height
+  }
+
+  private getOpenX() {
+    const { buttonWidth, orientation } = this.props
+    const closedXValue = buttonWidth / 2
+    return orientation === 'left'
+      ? this.windowWidth + closedXValue
+      : -this.windowWidth - closedXValue
+  }
+
+  private getClosedX() {
+    const { buttonWidth, orientation } = this.props
+    const closedXValue = buttonWidth / 2
+    return orientation === 'left' ? closedXValue : -closedXValue
   }
 
   private constrainX = (dx: number) => {
@@ -476,9 +548,11 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   }
 
   private constrainHeight = (dy: number) => {
-    const { minHeight } = this.props
-    const { startHeight } = this.state
-    return Math.min(Math.max(minHeight, startHeight - dy), this.windowHeight)
+    const { minimizedHeight } = this.props
+    return Math.min(
+      Math.max(minimizedHeight, this.startHeight - dy),
+      this.windowHeight
+    )
   }
 
   private greet() {
@@ -519,35 +593,49 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   }
 
   private async openOrClose(shouldOpen: boolean) {
+    const { duration, easing, minHeight, minimizedHeight } = this.props
+    const { listening, minimized } = this.state
+    let animations: Animated.CompositeAnimation[] = []
+    if (minimized) {
+      shouldOpen = true
+      animations.push(
+        Animated.timing(this.height, {
+          duration,
+          easing,
+          useNativeDriver: false,
+          toValue: minimizedHeight
+        })
+      )
+    } else if (this.currentHeight < minHeight) {
+      animations.push(
+        Animated.timing(this.height, {
+          duration,
+          easing,
+          useNativeDriver: false,
+          toValue: minHeight
+        })
+      )
+    }
     if (!shouldOpen) {
       this.setState({ open: shouldOpen })
     }
     this.setState({ pressed: false })
-    const { buttonWidth, duration, easing, orientation } = this.props
-    const { listening } = this.state
     this.windowWidth = Dimensions.get('window').width
-    const closedXValue = buttonWidth / 2
-    Animated.parallel([
+    ;([] as Animated.CompositeAnimation[]).push.apply(animations, [
       Animated.timing(this.panX, {
         duration,
         easing,
-        useNativeDriver: true,
-        toValue:
-          orientation === 'left'
-            ? shouldOpen
-              ? this.windowWidth + closedXValue
-              : closedXValue
-            : shouldOpen
-            ? -this.windowWidth - closedXValue
-            : -closedXValue
+        useNativeDriver: false,
+        toValue: shouldOpen ? this.getOpenX() : this.getClosedX()
       }),
       Animated.timing(this.shadowOpacity, {
         duration,
         easing,
-        useNativeDriver: true,
-        toValue: shouldOpen ? 0.25 : 0
+        useNativeDriver: false,
+        toValue: shouldOpen && !minimized ? 0.25 : 0
       })
-    ]).start(() => {
+    ])
+    Animated.parallel(animations).start(() => {
       const { onOpen, onClose } = this.props
       this.setState({ open: shouldOpen })
       if (shouldOpen) {
@@ -593,6 +681,27 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       return
     }
     this.openOrClose(false)
+  }
+
+  /**
+   * Minimize the tray so it only shows a bar at the bottom,
+   * with no chat bubbles.
+   * When listening, the gradient animates.
+   * When not listening, the primary color shows.
+   */
+  minimize = () => {
+    this.setState({ minimized: true }, () => {
+      this.openOrClose(true)
+    })
+  }
+
+  /**
+   * Return the tray to its normal, unminimized state.
+   */
+  unminimize = () => {
+    this.setState({ minimized: false }, () => {
+      this.openOrClose(true)
+    })
   }
 
   /**
@@ -678,18 +787,20 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     } = this.props
     const {
       bubbles,
-      height,
       listening,
       loading,
+      minimized,
       open,
       playerSource,
       pressed,
       silent
     } = this.state
+    const borderTopRadius = minimized ? 0 : 7
     const closedXValue = buttonWidth / 2
     const { width: deviceWidth } = Dimensions.get('window')
     return (
       <Animated.View
+        onLayout={this.setCurrentHeight}
         style={[
           styles.container,
           orientation === 'left'
@@ -703,13 +814,12 @@ export default class SpokestackTray extends PureComponent<Props, State> {
               },
           {
             width: this.windowWidth + closedXValue,
-            height,
+            height: this.height,
             transform: [{ translateX: this.panX }]
-          },
-          style
+          }
         ]}
       >
-        {!!playerSource && !silent && open && (
+        {!!playerSource && !silent && (open || minimized) && (
           <Video
             audioOnly
             allowsExternalPlayback
@@ -730,7 +840,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
             }}
           />
         )}
-        {!open && (
+        {!open && !minimized && (
           <View
             style={[
               styles.buttonView,
@@ -758,13 +868,27 @@ export default class SpokestackTray extends PureComponent<Props, State> {
           </View>
         )}
         <Animated.View
-          style={[styles.content, { shadowOpacity: this.shadowOpacity }]}
+          style={[
+            styles.content,
+            {
+              borderTopLeftRadius: borderTopRadius,
+              borderTopRightRadius: borderTopRadius,
+              borderWidth: minimized ? 0 : 1,
+              shadowOpacity: this.shadowOpacity
+            },
+            style
+          ]}
         >
           <SafeAreaView style={{ flex: 1 }}>
-            <View style={{ flex: 1 }}>
+            <View style={styles.innerContent}>
               <View
                 style={[
                   styles.header,
+                  {
+                    backgroundColor: minimized ? primaryColor : 'white',
+                    borderTopLeftRadius: borderTopRadius,
+                    borderTopRightRadius: borderTopRadius
+                  },
                   orientation === 'left'
                     ? {
                         flexDirection: 'row'
@@ -783,6 +907,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
                     style={[
                       styles.gradientWrap,
                       {
+                        height: minimized ? 55 : 7,
                         opacity: listening ? 1 : 0,
                         transform: [
                           {
@@ -814,49 +939,61 @@ export default class SpokestackTray extends PureComponent<Props, State> {
                       style={{ width: deviceWidth }}
                     />
                   </Animated.View>
-                  {listening ? (
-                    <Text style={[styles.listeningText, { fontFamily }]}>
-                      LISTENING ...
-                    </Text>
-                  ) : loading ? (
-                    <Text style={[styles.listeningText, { fontFamily }]}>
-                      LOADING ...
-                    </Text>
-                  ) : null}
-                </View>
-                <TouchableOpacity
-                  accessibilityRole="button"
-                  style={styles.headerButton}
-                  onPress={this.close}
-                >
-                  <Image
-                    source={arrowImage}
-                    style={[
-                      styles.arrow,
-                      orientation === 'right' && {
-                        transform: [{ rotateY: '180deg' }]
-                      }
-                    ]}
-                  />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  accessibilityRole="button"
-                  style={[styles.headerButton, styles.silentButton]}
-                  onPress={this.toggleSilent}
-                >
-                  {silent ? soundOff : soundOn}
-                </TouchableOpacity>
-              </View>
-              <SpeechBubbles
-                backgroundSystem={Color(primaryColor).fade(0.9).toString()}
-                bubbles={bubbles}
-                bubbleTextStyle={{ fontFamily }}
-                listening={listening}
-              />
 
-              <View style={styles.powered} pointerEvents="none">
-                <Image source={poweredImage} style={styles.poweredImage} />
+                  {!minimized &&
+                    (listening ? (
+                      <Text style={[styles.listeningText, { fontFamily }]}>
+                        LISTENING ...
+                      </Text>
+                    ) : (
+                      loading && (
+                        <Text style={[styles.listeningText, { fontFamily }]}>
+                          LOADING ...
+                        </Text>
+                      )
+                    ))}
+                </View>
+                {!minimized && (
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    style={styles.headerButton}
+                    onPress={this.close}
+                  >
+                    <Image
+                      source={arrowImage}
+                      style={[
+                        styles.arrow,
+                        orientation === 'right' && {
+                          transform: [{ rotateY: '180deg' }]
+                        }
+                      ]}
+                    />
+                  </TouchableOpacity>
+                )}
+                {!minimized && (
+                  <TouchableOpacity
+                    accessibilityRole="button"
+                    style={[styles.headerButton, styles.silentButton]}
+                    onPress={this.toggleSilent}
+                  >
+                    {silent ? soundOff : soundOn}
+                  </TouchableOpacity>
+                )}
               </View>
+              {!minimized && (
+                <SpeechBubbles
+                  backgroundSystem={Color(primaryColor).fade(0.9).toString()}
+                  bubbles={bubbles}
+                  bubbleTextStyle={{ fontFamily }}
+                  listening={listening}
+                />
+              )}
+
+              {!minimized && (
+                <View style={styles.powered} pointerEvents="none">
+                  <Image source={poweredImage} style={styles.poweredImage} />
+                </View>
+              )}
             </View>
           </SafeAreaView>
         </Animated.View>
@@ -873,8 +1010,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     backgroundColor: 'white',
-    borderTopLeftRadius: 7,
-    borderTopRightRadius: 7,
+    borderColor: '#e7ebee',
     shadowColor: '#262226',
     shadowOffset: {
       width: 0,
@@ -883,6 +1019,10 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 20
   },
+  innerContent: {
+    position: 'relative',
+    flex: 1
+  },
   header: {
     position: 'relative',
     width: '100%',
@@ -890,9 +1030,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 10,
     height: 55,
-    backgroundColor: 'white',
-    borderTopLeftRadius: 7,
-    borderTopRightRadius: 7,
     overflow: 'hidden',
     borderBottomWidth: 1,
     borderBottomColor: '#e7ebee'
@@ -910,8 +1047,7 @@ const styles = StyleSheet.create({
     // Support: Android
     // For some reason, a border is needed
     // for the this view to actually take up space
-    borderWidth: 1,
-    borderColor: 'transparent'
+    backgroundColor: 'transparent'
   },
   touchbar: {
     position: 'absolute',
@@ -931,7 +1067,6 @@ const styles = StyleSheet.create({
     top: -1,
     width: '300%',
     right: 0,
-    height: 7,
     flexDirection: 'row'
   },
   headerButton: {
