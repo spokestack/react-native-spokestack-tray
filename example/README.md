@@ -34,6 +34,8 @@ $ npm run dev # resets RN cache to set env vars
 
 Run the app on iOS or Android. Note that a real device is needed on Android for the mic to work.
 
+See [React Native's instructions](https://reactnative.dev/docs/running-on-device) for setting up a real device.
+
 ```sh
 $ npm run ios
 # or
