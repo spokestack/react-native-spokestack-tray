@@ -24,7 +24,15 @@ export SPOKESTACK_CLIENT_ID=$CLIENT_IDENTITY
 export SPOKESTACK_CLIENT_SECRET=$CLIENT_SECRET_KEY
 ```
 
-Now that you have tokens in place, run the app as normal...
+Now that you have tokens in place, the app can be run as normal.
+
+Start the packager...
+
+```sh
+$ npm run dev # resets RN cache to set env vars
+```
+
+Run the app on iOS or Android. Note that a real device is needed on Android for the mic to work.
 
 ```sh
 $ npm run ios
