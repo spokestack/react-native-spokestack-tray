@@ -96,7 +96,9 @@ defaultOptions.replace(rdefaultProps, function (all, key, value) {
   parsedDefaults[key] = value
   return all
 })
-const trayProps = getInterfaceContent('_src_spokestacktray_.props.md')
+const trayProps = getInterfaceContent(
+  '_src_spokestacktray_.spokestacktrayprops.md'
+)
 data += '\n---\n\n## `<SpokestackTray />` Component Props'
 data += trayProps
   // Add in default values to option descriptions

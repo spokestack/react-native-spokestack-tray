@@ -21,6 +21,11 @@ import {
   View,
   ViewStyle
 } from 'react-native'
+import {
+  EdgeInsets,
+  SafeAreaInsetsContext,
+  SafeAreaProvider
+} from 'react-native-safe-area-context'
 import React, { PureComponent } from 'react'
 import SpeechBubbles, { Bubble } from './SpeechBubbles'
 import {
@@ -28,7 +33,7 @@ import {
   SpokestackRecognizeEvent,
   TTSFormat
 } from 'react-native-spokestack'
-import { getSilent, setSilent } from './settings'
+import { getMinimized, getSilent, setMinimized, setSilent } from './settings'
 
 import Color from 'color'
 import HapticFeedback from 'react-native-haptic-feedback'
@@ -46,7 +51,7 @@ export interface IntentResult {
   data?: any
 }
 
-interface Props {
+interface SpokestackTrayProps {
   /**
    * Your Spokestack tokens generated in your Spokestack account
    * at https://spokestack.io/account.
@@ -76,16 +81,16 @@ interface Props {
     utterance?: string
   ) => IntentResult
   /**
-   * The URLs of your wakeword model files.
+   * The URLs of your NLU model files.
    * These models will be automatically downloaded
    * the first time the app opens, and then saved.
-   * This is required for wakeword to work.
-   * See https://spokestack.io/docs/Concepts/wakeword-models
+   * This is required for the NLU to work.
+   * See https://spokestack.io/docs/Concepts/nlu
    */
-  wakewordModelUrls: {
-    filter: string
-    detect: string
-    encode: string
+  nluModelUrls: {
+    nlu: string
+    vocab: string
+    metadata: string
   }
   /** Width (and height) of the mic button */
   buttonWidth?: number
@@ -126,22 +131,14 @@ interface Props {
    * that gets played whenever the tray starts listening.
    */
   haptic?: boolean
+  /** Height of the tray's header */
+  headerHeight?: number
   /** Minimum height for the tray */
   minHeight?: number
   /** Height of the minimized bar */
   minimizedHeight?: number
-  /**
-   * The URLs of your NLU model files.
-   * These models will be automatically downloaded
-   * the first time the app opens, and then saved.
-   * This is required for the NLU to work.
-   * See https://spokestack.io/docs/Concepts/nlu
-   */
-  nluModelUrls?: {
-    nlu: string
-    vocab: string
-    metadata: string
-  }
+  /** Set noMinimized: true to disable minimized mode */
+  noMinimized?: boolean
   /**
    * Called whenever the tray has closed
    */
@@ -190,6 +187,23 @@ interface Props {
   ttsFormat?: TTSFormat
   /** A key for a voice in Spokestack ASR, passed to Spokestack.synthesize */
   voice?: string
+  /**
+   * The URLs of your wakeword model files.
+   * These models will be automatically downloaded
+   * the first time the app opens, and then saved.
+   * If no wakeword model URLs are provided, Spokestack will default
+   *  to the "Spokestack" wakeword.
+   * See https://spokestack.io/docs/Concepts/wakeword-models
+   */
+  wakewordModelUrls?: {
+    filter: string
+    detect: string
+    encode: string
+  }
+}
+
+interface Props extends SpokestackTrayProps {
+  insets?: EdgeInsets
 }
 
 interface State {
@@ -203,14 +217,14 @@ interface State {
   silent: boolean
 }
 
-export default class SpokestackTray extends PureComponent<Props, State> {
+class SpokestackTray extends PureComponent<Props, State> {
   private wentToBackground: boolean
   private windowWidth = Dimensions.get('window').width
   private windowHeight: number
   private currentHeight: number // Current height of the container, even during animation
   private startHeight: number // Saved starting height for the move event
-  private height: Animated.Value
-  private panX: Animated.Value
+  private height = new Animated.Value(this.props.startHeight)
+  private panX = new Animated.Value(0)
   private shadowOpacity = new Animated.Value(0)
   private gradientAnim = new Animated.Value(0)
   private listenWhenDone = false
@@ -232,6 +246,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       this.panX.setValue(this.constrainX(dx))
     },
     onPanResponderRelease: (_event, { dx, dy }) => {
+      this.setState({ pressed: false })
       const { orientation } = this.props
       const shouldOpen =
         (Math.abs(dx) < 10 && Math.abs(dy) < 10) ||
@@ -241,12 +256,15 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       this.openOrClose(shouldOpen)
     },
     onPanResponderTerminate: () => {
+      this.setState({ pressed: false })
       this.openOrClose(false)
     }
   })
   private expandPanResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: () => true,
     onPanResponderGrant: () => {
+      this.setState({ pressed: true })
       this.startHeight = this.currentHeight
       this.windowHeight = Dimensions.get('window').height
     },
@@ -257,16 +275,24 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       this.height.setValue(this.constrainHeight(dy))
     },
     onPanResponderRelease: (_event, { dy }) => {
+      this.setState({ pressed: false })
       const { minHeight } = this.props
       const { minimized } = this.state
       if (minimized && Math.abs(dy) < 10) {
         Spokestack.listen()
         this.minimize()
       } else if (this.currentHeight < minHeight) {
-        console.log('Minimizing', this.currentHeight)
         this.minimize()
       } else {
-        console.log('Unminimizing', this.currentHeight, minHeight)
+        this.unminimize()
+      }
+    },
+    onPanResponderTerminate: () => {
+      this.setState({ pressed: false })
+      const { minimized } = this.state
+      if (minimized) {
+        this.minimize()
+      } else {
         this.unminimize()
       }
     }
@@ -280,8 +306,9 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     gradientColors: ['#61fae9', '#2F5BEA'],
     greet: false,
     haptic: true,
+    headerHeight: 55,
     minHeight: 180,
-    minimizedHeight: 44,
+    minimizedHeight: 30,
     orientation: 'left',
     primaryColor: '#2f5bea',
     sayGreeting: true,
@@ -307,14 +334,6 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     silent: false
   }
 
-  constructor(props: Props) {
-    super(props)
-    const { minimized } = this.state
-    // Start at 0 if minized and animate up
-    this.height = new Animated.Value(minimized ? 0 : props.startHeight)
-    this.panX = new Animated.Value(minimized ? this.getOpenX() : 0)
-  }
-
   async componentDidMount() {
     const {
       clientId,
@@ -323,7 +342,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       wakewordModelUrls,
       nluModelUrls
     } = this.props
-    this.initState()
+    await this.initState()
     this.addListeners()
     const initialized = await Spokestack.initialize({
       editTranscript: this.props.editTranscript,
@@ -348,7 +367,13 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   }
 
   private async initState() {
-    this.setState({ silent: await getSilent() })
+    const { noMinimized } = this.props
+    const minimized = !noMinimized && (await getMinimized())
+    this.setState({ minimized, silent: await getSilent() })
+    if (minimized) {
+      this.height.setValue(0)
+      this.panX.setValue(this.getOpenX())
+    }
   }
 
   private addListeners() {
@@ -483,12 +508,12 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   }
 
   private showMinimized() {
-    const { duration, easing, minimizedHeight } = this.props
+    const { duration, easing } = this.props
     Animated.timing(this.height, {
       duration,
       easing,
       useNativeDriver: false,
-      toValue: minimizedHeight
+      toValue: this.getMinimizedHeight()
     }).start()
   }
 
@@ -516,6 +541,12 @@ export default class SpokestackTray extends PureComponent<Props, State> {
 
   private setCurrentHeight = ({ nativeEvent }: LayoutChangeEvent) => {
     this.currentHeight = nativeEvent.layout.height
+  }
+
+  private getMinimizedHeight() {
+    const { insets, minimizedHeight } = this.props
+    const height = minimizedHeight + (insets ? insets.bottom : 0)
+    return height
   }
 
   private getOpenX() {
@@ -548,9 +579,12 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   }
 
   private constrainHeight = (dy: number) => {
-    const { minimizedHeight } = this.props
+    const { minHeight, noMinimized } = this.props
     return Math.min(
-      Math.max(minimizedHeight, this.startHeight - dy),
+      Math.max(
+        noMinimized ? minHeight : this.getMinimizedHeight(),
+        this.startHeight - dy
+      ),
       this.windowHeight
     )
   }
@@ -593,7 +627,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   }
 
   private async openOrClose(shouldOpen: boolean) {
-    const { duration, easing, minHeight, minimizedHeight } = this.props
+    const { duration, easing, minHeight, noMinimized } = this.props
     const { listening, minimized } = this.state
     let animations: Animated.CompositeAnimation[] = []
     if (minimized) {
@@ -603,10 +637,10 @@ export default class SpokestackTray extends PureComponent<Props, State> {
           duration,
           easing,
           useNativeDriver: false,
-          toValue: minimizedHeight
+          toValue: this.getMinimizedHeight()
         })
       )
-    } else if (this.currentHeight < minHeight) {
+    } else if (!noMinimized && this.currentHeight < minHeight) {
       animations.push(
         Animated.timing(this.height, {
           duration,
@@ -619,7 +653,6 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     if (!shouldOpen) {
       this.setState({ open: shouldOpen })
     }
-    this.setState({ pressed: false })
     this.windowWidth = Dimensions.get('window').width
     ;([] as Animated.CompositeAnimation[]).push.apply(animations, [
       Animated.timing(this.panX, {
@@ -689,7 +722,12 @@ export default class SpokestackTray extends PureComponent<Props, State> {
    * When listening, the gradient animates.
    * When not listening, the primary color shows.
    */
-  minimize = () => {
+  minimize = async () => {
+    const { noMinimized } = this.props
+    if (noMinimized) {
+      return
+    }
+    await setMinimized(true)
     this.setState({ minimized: true }, () => {
       this.openOrClose(true)
     })
@@ -698,7 +736,8 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   /**
    * Return the tray to its normal, unminimized state.
    */
-  unminimize = () => {
+  unminimize = async () => {
+    await setMinimized(false)
     this.setState({ minimized: false }, () => {
       this.openOrClose(true)
     })
@@ -779,6 +818,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       buttonWidth,
       fontFamily,
       gradientColors,
+      headerHeight,
       orientation,
       primaryColor,
       soundOnImage: soundOn,
@@ -798,6 +838,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     const borderTopRadius = minimized ? 0 : 7
     const closedXValue = buttonWidth / 2
     const { width: deviceWidth } = Dimensions.get('window')
+    const pressedColor = Color(primaryColor).darken(0.2).toString()
     return (
       <Animated.View
         onLayout={this.setCurrentHeight}
@@ -857,9 +898,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
                 width: buttonWidth,
                 height: buttonWidth,
                 borderRadius: buttonWidth,
-                backgroundColor: pressed
-                  ? Color(primaryColor).darken(0.2).toString()
-                  : primaryColor
+                backgroundColor: pressed ? pressedColor : primaryColor
               }
             ]}
             {...this.openPanResponder.panHandlers}
@@ -885,17 +924,19 @@ export default class SpokestackTray extends PureComponent<Props, State> {
                 style={[
                   styles.header,
                   {
-                    backgroundColor: minimized ? primaryColor : 'white',
+                    backgroundColor: minimized
+                      ? pressed
+                        ? pressedColor
+                        : primaryColor
+                      : 'white',
                     borderTopLeftRadius: borderTopRadius,
-                    borderTopRightRadius: borderTopRadius
-                  },
-                  orientation === 'left'
-                    ? {
-                        flexDirection: 'row'
-                      }
-                    : {
-                        flexDirection: 'row-reverse'
-                      }
+                    borderTopRightRadius: borderTopRadius,
+                    flexDirection:
+                      orientation === 'left' ? 'row' : 'row-reverse',
+                    height: minimized
+                      ? this.getMinimizedHeight() + 1
+                      : headerHeight
+                  }
                 ]}
               >
                 <View
@@ -907,7 +948,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
                     style={[
                       styles.gradientWrap,
                       {
-                        height: minimized ? 55 : 7,
+                        height: minimized ? this.getMinimizedHeight() : 7,
                         opacity: listening ? 1 : 0,
                         transform: [
                           {
@@ -980,26 +1021,32 @@ export default class SpokestackTray extends PureComponent<Props, State> {
                   </TouchableOpacity>
                 )}
               </View>
-              {!minimized && (
-                <SpeechBubbles
-                  backgroundSystem={Color(primaryColor).fade(0.9).toString()}
-                  bubbles={bubbles}
-                  bubbleTextStyle={{ fontFamily }}
-                  listening={listening}
-                />
-              )}
+              <SpeechBubbles
+                backgroundSystem={Color(primaryColor).fade(0.9).toString()}
+                bubbles={bubbles}
+                bubbleTextStyle={{ fontFamily }}
+                listening={listening}
+              />
 
-              {!minimized && (
-                <View style={styles.powered} pointerEvents="none">
-                  <Image source={poweredImage} style={styles.poweredImage} />
-                </View>
-              )}
+              <View style={styles.powered} pointerEvents="none">
+                <Image source={poweredImage} style={styles.poweredImage} />
+              </View>
             </View>
           </SafeAreaView>
         </Animated.View>
       </Animated.View>
     )
   }
+}
+
+export default function SpokestackTrayWithInsets(props: SpokestackTrayProps) {
+  return (
+    <SafeAreaProvider style={StyleSheet.absoluteFill}>
+      <SafeAreaInsetsContext.Consumer>
+        {(insets) => <SpokestackTray {...props} insets={insets} />}
+      </SafeAreaInsetsContext.Consumer>
+    </SafeAreaProvider>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -1020,8 +1067,9 @@ const styles = StyleSheet.create({
     elevation: 20
   },
   innerContent: {
-    position: 'relative',
-    flex: 1
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center'
   },
   header: {
     position: 'relative',
@@ -1029,7 +1077,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 10,
-    height: 55,
     overflow: 'hidden',
     borderBottomWidth: 1,
     borderBottomColor: '#e7ebee'
@@ -1094,10 +1141,7 @@ const styles = StyleSheet.create({
     height: 20
   },
   powered: {
-    position: 'absolute',
-    bottom: 10,
-    left: '50%',
-    marginLeft: -59
+    marginTop: 10
   },
   poweredImage: {
     width: 118,

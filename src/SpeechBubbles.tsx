@@ -30,7 +30,11 @@ export default function SpeechBubbles({
     })
   }, [bubbles, listening])
   return (
-    <ScrollView contentContainerStyle={styles.scrollView} ref={scrollView}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollView}
+      ref={scrollView}
+    >
       {bubbles.map((bubble, i) => (
         <SpeechBubble
           key={`bubble-${i}`}
@@ -48,6 +52,10 @@ export default function SpeechBubbles({
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    width: '100%'
+  },
   scrollView: {
     padding: 20,
     paddingBottom: 30
