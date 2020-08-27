@@ -27,13 +27,13 @@ export default function handleIntent(
     case 'AMAZON.YesIntent':
       lastNode = {
         node: 'search',
-        prompt: 'I heard you say yes! What would you like to make?'
+        prompt: `I heard you say ${utterance}, and the NLU returned the yes intent. Now say stop.`
       }
       return lastNode
     case 'AMAZON.NoIntent':
       lastNode = {
         node: 'exit',
-        prompt: 'I heard you say no. Goodbye.'
+        prompt: `I heard you say ${utterance}, and the NLU returned the no intent. I don't have to exit, but this app will.`
       }
       return lastNode
     case 'AMAZON.StopIntent':

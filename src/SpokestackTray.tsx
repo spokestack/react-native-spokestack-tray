@@ -13,7 +13,6 @@ import {
   LayoutChangeEvent,
   PanResponder,
   PanResponderGestureState,
-  SafeAreaView,
   StyleProp,
   StyleSheet,
   Text,
@@ -279,7 +278,8 @@ class SpokestackTray extends PureComponent<Props, State> {
       const { minHeight } = this.props
       const { minimized } = this.state
       if (minimized && Math.abs(dy) < 10) {
-        Spokestack.listen()
+        this.listenWhenDone = true
+        this.onEnd()
         this.minimize()
       } else if (this.currentHeight < minHeight) {
         this.minimize()
@@ -308,7 +308,7 @@ class SpokestackTray extends PureComponent<Props, State> {
     haptic: true,
     headerHeight: 55,
     minHeight: 180,
-    minimizedHeight: 30,
+    minimizedHeight: 44,
     orientation: 'left',
     primaryColor: '#2f5bea',
     sayGreeting: true,
@@ -545,8 +545,10 @@ class SpokestackTray extends PureComponent<Props, State> {
 
   private getMinimizedHeight() {
     const { insets, minimizedHeight } = this.props
-    const height = minimizedHeight + (insets ? insets.bottom : 0)
-    return height
+    if (insets.bottom > 0) {
+      return Math.min(minimizedHeight + insets.bottom, 60)
+    }
+    return minimizedHeight
   }
 
   private getOpenX() {
@@ -631,7 +633,6 @@ class SpokestackTray extends PureComponent<Props, State> {
     const { listening, minimized } = this.state
     let animations: Animated.CompositeAnimation[] = []
     if (minimized) {
-      shouldOpen = true
       animations.push(
         Animated.timing(this.height, {
           duration,
@@ -659,7 +660,7 @@ class SpokestackTray extends PureComponent<Props, State> {
         duration,
         easing,
         useNativeDriver: false,
-        toValue: shouldOpen ? this.getOpenX() : this.getClosedX()
+        toValue: shouldOpen || minimized ? this.getOpenX() : this.getClosedX()
       }),
       Animated.timing(this.shadowOpacity, {
         duration,
@@ -678,8 +679,9 @@ class SpokestackTray extends PureComponent<Props, State> {
         // and then stopped due to error
         // during the animation.
         // opened() would then try to listen again,
-        // causing an infinite loop
-        if (!listening) {
+        // causing an infinite loop.
+        // Also, minimized mode handles its own listening on tap.
+        if (!listening && !minimized) {
           this.opened()
         }
         if (onOpen) {
@@ -819,6 +821,7 @@ class SpokestackTray extends PureComponent<Props, State> {
       fontFamily,
       gradientColors,
       headerHeight,
+      insets,
       orientation,
       primaryColor,
       soundOnImage: soundOn,
@@ -918,121 +921,123 @@ class SpokestackTray extends PureComponent<Props, State> {
             style
           ]}
         >
-          <SafeAreaView style={{ flex: 1 }}>
-            <View style={styles.innerContent}>
+          <View
+            style={[
+              styles.innerContent,
+              { paddingBottom: insets.bottom > 0 ? insets.bottom : 20 }
+            ]}
+          >
+            <View
+              style={[
+                styles.header,
+                {
+                  backgroundColor: minimized
+                    ? pressed
+                      ? pressedColor
+                      : primaryColor
+                    : 'white',
+                  borderTopLeftRadius: borderTopRadius,
+                  borderTopRightRadius: borderTopRadius,
+                  flexDirection: orientation === 'left' ? 'row' : 'row-reverse',
+                  height: minimized
+                    ? this.getMinimizedHeight() + 1
+                    : headerHeight
+                }
+              ]}
+            >
               <View
-                style={[
-                  styles.header,
-                  {
-                    backgroundColor: minimized
-                      ? pressed
-                        ? pressedColor
-                        : primaryColor
-                      : 'white',
-                    borderTopLeftRadius: borderTopRadius,
-                    borderTopRightRadius: borderTopRadius,
-                    flexDirection:
-                      orientation === 'left' ? 'row' : 'row-reverse',
-                    height: minimized
-                      ? this.getMinimizedHeight() + 1
-                      : headerHeight
-                  }
-                ]}
+                style={styles.resizer}
+                {...this.expandPanResponder.panHandlers}
               >
-                <View
-                  style={styles.resizer}
-                  {...this.expandPanResponder.panHandlers}
+                <View style={styles.touchbar} pointerEvents="none" />
+                <Animated.View
+                  style={[
+                    styles.gradientWrap,
+                    {
+                      height: minimized ? this.getMinimizedHeight() : 7,
+                      opacity: listening ? 1 : 0,
+                      transform: [
+                        {
+                          translateX: this.gradientAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, deviceWidth * 2]
+                          })
+                        }
+                      ]
+                    }
+                  ]}
                 >
-                  <View style={styles.touchbar} pointerEvents="none" />
-                  <Animated.View
+                  <LinearGradient
+                    colors={gradientColors}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={{ width: deviceWidth }}
+                  />
+                  <LinearGradient
+                    colors={[...gradientColors].reverse()}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={{ width: deviceWidth }}
+                  />
+                  <LinearGradient
+                    colors={gradientColors}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={{ width: deviceWidth }}
+                  />
+                </Animated.View>
+
+                {!minimized &&
+                  (listening ? (
+                    <Text style={[styles.listeningText, { fontFamily }]}>
+                      LISTENING ...
+                    </Text>
+                  ) : (
+                    loading && (
+                      <Text style={[styles.listeningText, { fontFamily }]}>
+                        LOADING ...
+                      </Text>
+                    )
+                  ))}
+              </View>
+              {!minimized && (
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  style={styles.headerButton}
+                  onPress={this.close}
+                >
+                  <Image
+                    source={arrowImage}
                     style={[
-                      styles.gradientWrap,
-                      {
-                        height: minimized ? this.getMinimizedHeight() : 7,
-                        opacity: listening ? 1 : 0,
-                        transform: [
-                          {
-                            translateX: this.gradientAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [0, deviceWidth * 2]
-                            })
-                          }
-                        ]
+                      styles.arrow,
+                      orientation === 'right' && {
+                        transform: [{ rotateY: '180deg' }]
                       }
                     ]}
-                  >
-                    <LinearGradient
-                      colors={gradientColors}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={{ width: deviceWidth }}
-                    />
-                    <LinearGradient
-                      colors={[...gradientColors].reverse()}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={{ width: deviceWidth }}
-                    />
-                    <LinearGradient
-                      colors={gradientColors}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={{ width: deviceWidth }}
-                    />
-                  </Animated.View>
-
-                  {!minimized &&
-                    (listening ? (
-                      <Text style={[styles.listeningText, { fontFamily }]}>
-                        LISTENING ...
-                      </Text>
-                    ) : (
-                      loading && (
-                        <Text style={[styles.listeningText, { fontFamily }]}>
-                          LOADING ...
-                        </Text>
-                      )
-                    ))}
-                </View>
-                {!minimized && (
-                  <TouchableOpacity
-                    accessibilityRole="button"
-                    style={styles.headerButton}
-                    onPress={this.close}
-                  >
-                    <Image
-                      source={arrowImage}
-                      style={[
-                        styles.arrow,
-                        orientation === 'right' && {
-                          transform: [{ rotateY: '180deg' }]
-                        }
-                      ]}
-                    />
-                  </TouchableOpacity>
-                )}
-                {!minimized && (
-                  <TouchableOpacity
-                    accessibilityRole="button"
-                    style={[styles.headerButton, styles.silentButton]}
-                    onPress={this.toggleSilent}
-                  >
-                    {silent ? soundOff : soundOn}
-                  </TouchableOpacity>
-                )}
-              </View>
-              <SpeechBubbles
-                backgroundSystem={Color(primaryColor).fade(0.9).toString()}
-                bubbles={bubbles}
-                bubbleTextStyle={{ fontFamily }}
-                listening={listening}
-              />
-
-              <View style={styles.powered} pointerEvents="none">
-                <Image source={poweredImage} style={styles.poweredImage} />
-              </View>
+                  />
+                </TouchableOpacity>
+              )}
+              {!minimized && (
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  style={[styles.headerButton, styles.silentButton]}
+                  onPress={this.toggleSilent}
+                >
+                  {silent ? soundOff : soundOn}
+                </TouchableOpacity>
+              )}
             </View>
-          </SafeAreaView>
+            <SpeechBubbles
+              backgroundSystem={Color(primaryColor).fade(0.9).toString()}
+              bubbles={bubbles}
+              bubbleTextStyle={{ fontFamily }}
+              listening={listening}
+            />
+
+            <View style={styles.powered} pointerEvents="none">
+              <Image source={poweredImage} style={styles.poweredImage} />
+            </View>
+          </View>
         </Animated.View>
       </Animated.View>
     )
@@ -1141,7 +1146,7 @@ const styles = StyleSheet.create({
     height: 20
   },
   powered: {
-    marginTop: 10
+    marginTop: 20
   },
   poweredImage: {
     width: 118,
