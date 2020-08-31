@@ -520,7 +520,9 @@ export default class SpokestackTray extends PureComponent<Props, State> {
 
   private async openOrClose(shouldOpen: boolean) {
     if (!shouldOpen) {
-      this.setState({ open: shouldOpen })
+      // Set open to false to immediately show the mic button
+      // Clear the player source as well to stop playing
+      this.setState({ open: shouldOpen, playerSource: null })
     }
     this.setState({ pressed: false })
     const { buttonWidth, duration, easing, orientation } = this.props
@@ -709,7 +711,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
           style
         ]}
       >
-        {!!playerSource && !silent && open && (
+        {!!playerSource && !silent && (
           <Video
             audioOnly
             allowsExternalPlayback
