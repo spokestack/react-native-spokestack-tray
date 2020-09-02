@@ -9,7 +9,8 @@ import type { IntentResult } from 'react-native-spokestack-tray'
 const greeting = {
   node: 'greeting',
   prompt:
-    'Welcome! This example uses models for Minecraft. Try saying, "How do I make a castle?"'
+    'Welcome! This example uses Minecraft sample models. Try saying, "How do I make a castle?"',
+  noInterrupt: true
 }
 
 let lastNode: IntentResult = greeting

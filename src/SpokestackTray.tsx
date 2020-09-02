@@ -40,8 +40,20 @@ import soundOffImage from './images/icon-sound-off.png'
 import soundOnImage from './images/icon-sound-on.png'
 
 export interface IntentResult {
+  /**
+   * A user-defined key to indicate where the user is in the conversation
+   * Include this in the `exitNodes` prop if Spokestack should not listen
+   *   again after saying the prompt.
+   */
   node: string
+  /** Will be processed into Speech unless the tray is in silent mode */
   prompt: string
+  /**
+   * Set to `true` to stop the wakeword recognizer
+   * during playback of the prompt.
+   */
+  noInterrupt?: boolean
+  /** Any other data you might want to add */
   data?: any
 }
 
@@ -90,6 +102,8 @@ interface Props {
   buttonWidth?: number
   /** How long to wait to close the tray after speaking (ms) */
   closeDelay?: number
+  /** Show debug messages from react-native-spokestack */
+  debug?: boolean
   /** Duration for the tray animation (ms) */
   duration?: number
   /** Easing function for the tray animation */
@@ -117,7 +131,7 @@ interface Props {
   /**
    * Whether to greet the user with a welcome message
    * when the tray opens.
-   * Default: false
+   * Note: `handleIntent` must respond to the "greet" intent.
    */
   greet?: boolean
   /**
@@ -167,7 +181,6 @@ interface Props {
    * Whether to speak the greeting or only display
    * a chat bubble with the greet message,
    * even if sound is on.
-   * Default: true
    */
   sayGreeting?: boolean
   /** Replace the sound on image by passing an <Image /> */
@@ -288,13 +301,15 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     const {
       clientId,
       clientSecret,
+      debug,
+      nluModelUrls,
       refreshModels,
-      wakewordModelUrls,
-      nluModelUrls
+      wakewordModelUrls
     } = this.props
     this.initState()
     this.addListeners()
     const initialized = await Spokestack.initialize({
+      debug,
       editTranscript: this.props.editTranscript,
       nluModelUrls,
       refreshModels,
@@ -374,20 +389,31 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     }
   }
 
-  private handleIntent = ({ result }: SpokestackNLUEvent) => {
-    const { closeDelay, exitNodes, handleIntent, onError } = this.props
+  private handleIntent = async ({ result }: SpokestackNLUEvent) => {
+    const {
+      closeDelay,
+      exitNodes,
+      handleIntent,
+      onError,
+      sayGreeting
+    } = this.props
     const { silent } = this.state
     const response = handleIntent(result.intent, result.slots, this.utterance)
+    console.log(`Processed intent ${result.intent}`, response)
     const shouldListen = exitNodes.indexOf(response.node) === -1
     if (response.prompt) {
-      if (silent) {
+      const isGreeting = result.intent === 'greet'
+      if (silent || (isGreeting && !sayGreeting)) {
         this.addBubble({ text: response.prompt, isLeft: true })
         if (shouldListen) {
-          setTimeout(Spokestack.listen, 500)
+          setTimeout(Spokestack.listen, 200)
         } else {
           setTimeout(this.close, closeDelay)
         }
       } else {
+        if (response.noInterrupt) {
+          await Spokestack.stop()
+        }
         this.listenWhenDone = shouldListen
         this.say(response.prompt)
       }
@@ -453,7 +479,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     this.setState({ playerSource: null }, () => {
       if (this.listenWhenDone) {
         this.listenWhenDone = false
-        Spokestack.listen()
+        setTimeout(Spokestack.listen, 200)
       } else {
         setTimeout(this.close, this.props.closeDelay)
       }
@@ -481,29 +507,6 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     return Math.min(Math.max(minHeight, startHeight - dy), this.windowHeight)
   }
 
-  private greet() {
-    const { greet, handleIntent, onError, sayGreeting } = this.props
-    const { silent } = this.state
-    if (!greet) {
-      return
-    }
-    const response = handleIntent('greet')
-    if (response.prompt) {
-      if (sayGreeting && !silent) {
-        this.listenWhenDone = true
-        this.say(response.prompt)
-      } else {
-        this.addBubble({ text: response.prompt, isLeft: true })
-        Spokestack.listen()
-      }
-    } else {
-      onError({
-        type: Spokestack.ListenerType.ERROR,
-        error: 'No prompt returned in the response'
-      })
-    }
-  }
-
   private async opened() {
     const { greet } = this.props
     const { listening } = this.state
@@ -512,7 +515,9 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       return
     }
     if (greet) {
-      this.greet()
+      this.handleIntent({
+        result: { intent: 'greet', confidence: 100, slots: [] }
+      })
     } else {
       Spokestack.listen()
     }

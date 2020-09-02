@@ -1,4 +1,3 @@
-import { AppState, Platform } from 'react-native'
 import RNSpokestack, {
   SpokestackConfig,
   SpokestackEvent,
@@ -6,6 +5,7 @@ import RNSpokestack, {
 } from 'react-native-spokestack'
 import { checkSpeech, requestSpeech } from './permissions'
 
+import { AppState } from 'react-native'
 import { download } from './Download'
 import map from 'lodash/map'
 import merge from 'lodash/merge'
@@ -106,11 +106,13 @@ function runNativeCommand(
       clearTimeout(timer)
       reject(new Error(e.error))
     })
-    fn()
+    rafForeground(fn)
   })
 }
 
 interface Config {
+  /** Show debug (trace) messages from react-native-spokestack */
+  debug?: boolean
   /** Edit the transcript before passing it to onRecognize and classify */
   editTranscript?: (transcript: string) => string
   /** Use this sparingly to refresh the models on device (force overwrite) */
@@ -156,11 +158,11 @@ async function init(config: Config = {}) {
     )
     config.wakewordModelUrls = {
       filter:
-        'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/filter.lite',
+        'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/filter.tflite',
       detect:
-        'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/detect.lite',
+        'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/detect.tflite',
       encode:
-        'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/encode.lite'
+        'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/encode.tflite'
     }
   }
   const wakewordFiles =
@@ -262,8 +264,9 @@ async function init(config: Config = {}) {
         'fft-window-size': 512,
         'fft-hop-length': 10,
         'pre-emphasis': 0.97,
-        // 'trace-level': RNSpokestack.TraceLevel.DEBUG
-        'trace-level': RNSpokestack.TraceLevel.NONE
+        'trace-level': config.debug
+          ? RNSpokestack.TraceLevel.DEBUG
+          : RNSpokestack.TraceLevel.NONE
       },
       tts: {
         ttsServiceClass: 'io.spokestack.spokestack.tts.SpokestackTTSService'
@@ -417,8 +420,8 @@ async function activate() {
   }
   console.log('Activating')
 
-  if (Platform.OS === 'android' && !started) {
-    await start()
+  if (!started) {
+    await startPipeline()
   }
 
   return runNativeCommand(ListenerType.ACTIVATE, () => {
@@ -542,16 +545,17 @@ export async function initialize(config: Config) {
 }
 
 /**
- * Tell Spokestack to start listening for the wakeword.
+ * Tell Spokestack to start the speech pipeline,
+ * beginning with the wakeword recognizer.
  * When the wakeword is heard, Spokestack will
- * then start listening using ASR and open the tray.
+ * start listening using ASR and open the tray.
  *
  * ```js
- * import { listen } from 'react-native-spokestack-tray
+ * import { start } from 'react-native-spokestack-tray
  *
  * // ...
  *
- * listen()
+ * start()
  * ```
  */
 export async function start() {

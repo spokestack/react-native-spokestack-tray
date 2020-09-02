@@ -1,11 +1,12 @@
-import * as React from 'react'
-
+import React, { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 import SpokestackTray from 'react-native-spokestack-tray'
 import handleIntent from './handleIntent'
 
 export default function App() {
+  // Used to only speak the greeting the first time
+  const [sayGreeting, setSayGreeting] = useState(true)
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -22,7 +23,15 @@ export default function App() {
         clientSecret={process.env.SPOKESTACK_CLIENT_SECRET}
         greet
         exitNodes={['exit']}
-        handleIntent={handleIntent}
+        handleIntent={(intent, slots, utterance) => {
+          if (intent === 'greet') {
+            // Since setting state is async,
+            // the greeting still gets played the first time.
+            setSayGreeting(false)
+          }
+          return handleIntent(intent, slots, utterance)
+        }}
+        sayGreeting={sayGreeting}
         nluModelUrls={{
           nlu:
             'https://d3dmqd7cy685il.cloudfront.net/nlu/production/shared/XtASJqxkO6UwefOzia-he2gnIMcBnR2UCF-VyaIy-OI/nlu.tflite',
