@@ -165,8 +165,7 @@ export async function download(
   currentlyDownloading.push(file.id)
 
   const promise = RNFetchBlob.config({
-    appendExt: 'mp3',
-    indicator: true,
+    appendExt: 'tflite',
     path:
       config.overwrite && existingFile
         ? pathForFilename(existingFile.filename)

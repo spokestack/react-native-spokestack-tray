@@ -237,6 +237,9 @@ async function init(config: Config = {}) {
     return
   }
 
+  console.log('Wakeword files downloaded to ', wakewordFiles)
+  console.log('NLU files downloaded to ', nluFiles)
+
   const spokestackOpts: SpokestackConfig = merge(
     {
       input: 'io.spokestack.spokestack.android.PreASRMicrophoneInput',
