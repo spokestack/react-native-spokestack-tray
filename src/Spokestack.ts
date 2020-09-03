@@ -181,7 +181,7 @@ async function init(config: Config = {}) {
             forceCellular: true,
             fetchBlobConfig: {
               appendExt: 'tflite',
-              overwrite: config.refreshModels
+              overwrite: !!config.refreshModels
             }
           }
         )
@@ -209,7 +209,7 @@ async function init(config: Config = {}) {
             forceCellular: true,
             fetchBlobConfig: {
               appendExt: 'tflite',
-              overwrite: config.refreshModels
+              overwrite: !!config.refreshModels
             }
           }
         ),
@@ -220,7 +220,7 @@ async function init(config: Config = {}) {
             forceCellular: true,
             fetchBlobConfig: {
               appendExt: 'txt',
-              overwrite: config.refreshModels
+              overwrite: !!config.refreshModels
             }
           }
         ),
@@ -231,7 +231,7 @@ async function init(config: Config = {}) {
             forceCellular: true,
             fetchBlobConfig: {
               appendExt: 'json',
-              overwrite: config.refreshModels
+              overwrite: !!config.refreshModels
             }
           }
         )
