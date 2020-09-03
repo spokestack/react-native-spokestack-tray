@@ -82,16 +82,16 @@ export async function download(
   }
   const config = options.fetchBlobConfig || {}
 
-  const promise = RNFetchBlob.config({
+  return RNFetchBlob.config({
     ...config,
     path: `${RNFetchBlob.fs.dirs.DocumentDir}/${file.id}.${
       config.appendExt || 'tflite'
     }`
-  }).fetch('GET', url)
-
-  return promise.then(async (res) => {
-    const path = res.path()
-    console.log(`File saved to ${path}`)
-    return path
   })
+    .fetch('GET', url)
+    .then(async (res) => {
+      const path = res.path()
+      console.log(`File saved to ${path}`)
+      return path
+    })
 }
