@@ -67,6 +67,16 @@ async function checkNetwork(options: DownloadOptions) {
   }
 }
 
+function getDir() {
+  return Platform.OS === 'ios'
+    ? `${RNFetchBlob.fs.dirs.DocumentDir}/RNFetchBlob_tmp`
+    : RNFetchBlob.fs.dirs.DocumentDir
+}
+
+export function pathForFilename(filename: string) {
+  return `${getDir()}/${filename}`
+}
+
 export function fileExists(file?: File) {
   if (!file || !file.filename) {
     return false
@@ -83,16 +93,6 @@ export async function getFile(id: string) {
     return file
   }
   return null
-}
-
-function getDir() {
-  return Platform.OS === 'ios'
-    ? `${RNFetchBlob.fs.dirs.DocumentDir}/RNFetchBlob_tmp`
-    : RNFetchBlob.fs.dirs.DocumentDir
-}
-
-export function pathForFilename(filename: string) {
-  return `${getDir()}/${filename}`
 }
 
 async function getFiles(): Promise<File[]> {
@@ -176,22 +176,19 @@ export async function download(
     })
   }
 
-  return promise
-    .then(async (res) => {
-      const path = res.path()
-      // Find file again in case of a race condition
-      let newFile: Partial<File> = find(files, { id: file.id })
-      if (!newFile) {
-        newFile = { id: file.id }
-        files.push(newFile as File)
-      }
-      newFile.filename = (await RNFetchBlob.fs.stat(path)).filename
-      await persist(files)
-      return path
-    })
-    .catch((error) => {
-      throw error
-    })
+  return promise.then(async (res) => {
+    const path = res.path()
+    console.log(`File saved to ${path}`)
+    // Find file again in case of a race condition
+    let newFile: Partial<File> = find(files, { id: file.id })
+    if (!newFile) {
+      newFile = { id: file.id }
+      files.push(newFile as File)
+    }
+    newFile.filename = (await RNFetchBlob.fs.stat(path)).filename
+    await persist(files)
+    return path
+  })
 }
 
 export async function remove(ids: string | string[]) {
