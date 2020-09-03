@@ -334,7 +334,6 @@ async function init(config: Config = {}) {
   }
   RNSpokestack.onDeactivate = async (e) => {
     console.log('[Spokestack onDeactivate]:', JSON.stringify(e))
-    // Deactivate automatically restarts wakeword
     listening = false
     execute(ListenerType.DEACTIVATE, e)
   }
@@ -350,7 +349,6 @@ async function init(config: Config = {}) {
     // Only call listeners if there's a transcript
     if (e.transcript.length > 0) {
       rafForeground(() => {
-        listening = false
         execute(ListenerType.RECOGNIZE, e)
         rafForeground(() => RNSpokestack.classify(e.transcript))
       })
@@ -398,16 +396,19 @@ async function init(config: Config = {}) {
 }
 
 async function startPipeline() {
-  if (!(await checkSpeech())) {
-    if (started || listening) {
-      await stop()
-    }
-    return false
-  }
   if (listening || started) {
+    console.log(
+      `Not starting pipeline because ${
+        listening ? 'already listening' : 'already started'
+      }.`
+    )
     return true
   }
-  if (!initialized || AppState.currentState !== 'active') {
+  if (
+    !initialized ||
+    AppState.currentState === 'background' ||
+    !(await checkSpeech())
+  ) {
     return false
   }
   console.log('Starting')
