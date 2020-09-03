@@ -152,9 +152,15 @@ async function init(config: Config = {}) {
   const editTranscript = config.editTranscript || ((transcript) => transcript)
   let nluFiles: string[] = []
 
-  if (!config.wakewordModelUrls) {
+  const wakewordModelUrls = config.wakewordModelUrls
+  if (
+    !wakewordModelUrls ||
+    typeof wakewordModelUrls.filter !== 'string' ||
+    typeof wakewordModelUrls.detect !== 'string' ||
+    typeof wakewordModelUrls.encode !== 'string'
+  ) {
     console.warn(
-      'No wakeword model URLs specified. Using "Spokestack" wakeword files.'
+      'Wakeword model URLs not specified (filter, detect, and encode required). Using "Spokestack" wakeword files.'
     )
     config.wakewordModelUrls = {
       filter:
@@ -181,13 +187,19 @@ async function init(config: Config = {}) {
         )
       )
     ).catch((error) => {
-      console.error('Failed to download Spokestack model files', error)
+      console.error('Failed to download Spokestack wakeword files', error)
       execute(ListenerType.ERROR, {
         error: 'Failed to download Spokestack wakeword files'
       })
     })) || []
 
-  if (config.nluModelUrls) {
+  const nluModelUrls = config.nluModelUrls
+  if (
+    nluModelUrls &&
+    typeof nluModelUrls.nlu === 'string' &&
+    typeof nluModelUrls.vocab === 'string' &&
+    typeof nluModelUrls.metadata === 'string'
+  ) {
     nluFiles =
       (await Promise.all([
         download(
@@ -224,14 +236,14 @@ async function init(config: Config = {}) {
           }
         )
       ]).catch((error) => {
-        console.error('Failed to download Spokestack model files', error)
+        console.error('Failed to download Spokestack NLU files', error)
         execute(ListenerType.ERROR, {
-          error: 'Failed to download Spokestack wakeword files'
+          error: 'Failed to download Spokestack NLU files'
         })
       })) || []
   } else {
     const error =
-      'No NLU model URLs provided. An NLU is required to process speech. See https://spokestack.io/docs/Concepts/nlu for details.'
+      'NLU model URLs not specified (nlu, vocab, and metadata required). An NLU is required to process speech. See https://spokestack.io/docs/Concepts/nlu for details.'
     console.error(error)
     execute(ListenerType.ERROR, { error })
     return
@@ -239,6 +251,11 @@ async function init(config: Config = {}) {
 
   console.log('Wakeword files downloaded to ', wakewordFiles)
   console.log('NLU files downloaded to ', nluFiles)
+
+  // If any download failed, abort
+  if (nluFiles.length !== 3 || wakewordFiles.length !== 3) {
+    return
+  }
 
   const spokestackOpts: SpokestackConfig = merge(
     {

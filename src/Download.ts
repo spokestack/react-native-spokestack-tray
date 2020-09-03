@@ -24,8 +24,6 @@ export interface DownloadOptions {
 }
 
 let files: File[]
-// A list of IDs currently downloading
-const currentlyDownloading: string[] = []
 
 function handleError(error: Error, message: string) {
   console.error('Download error', message, error)
@@ -65,7 +63,7 @@ async function checkNetwork(options: DownloadOptions) {
         )
       })
     default:
-      throw new Error('Please verify your network connection.')
+      return false
   }
 }
 
@@ -143,7 +141,11 @@ export async function download(
     )
   }
   if (!(await checkNetwork(options))) {
-    return null
+    return Promise.reject(
+      new Error(
+        'Could not detect a usable network connection. Please check your network.'
+      )
+    )
   }
   // Use the main source of truth instead of shadowing files
   // to allow simultaneous downloads/race conditions.
@@ -157,13 +159,6 @@ export async function download(
   if (existingFile && !config.overwrite) {
     return pathForFilename(existingFile.filename)
   }
-
-  // Don't download if already downloading
-  if (isDownloading(file.id)) {
-    return null
-  }
-  currentlyDownloading.push(file.id)
-
   const promise = RNFetchBlob.config({
     appendExt: 'tflite',
     path:
@@ -180,10 +175,6 @@ export async function download(
       options.onProgress(Math.floor((received / total) * 100))
     })
   }
-  function removeFromDownloading() {
-    const index = currentlyDownloading.indexOf(file.id)
-    currentlyDownloading.splice(index, 1)
-  }
 
   return promise
     .then(async (res) => {
@@ -196,17 +187,11 @@ export async function download(
       }
       newFile.filename = (await RNFetchBlob.fs.stat(path)).filename
       await persist(files)
-      removeFromDownloading()
       return path
     })
     .catch((error) => {
-      removeFromDownloading()
       throw error
     })
-}
-
-export function isDownloading(id: string) {
-  return currentlyDownloading.includes(id)
 }
 
 export async function remove(ids: string | string[]) {
