@@ -115,15 +115,28 @@ interface Config {
   debug?: boolean
   /** Edit the transcript before passing it to onRecognize and classify */
   editTranscript?: (transcript: string) => string
+  /**
+   * Pass the URLs of your NLU model files.
+   * These models will be automatically downloaded
+   * the first time the app opens, and then saved.
+   * This is required for the NLU to work.
+   * See https://spokestack.io/docs/Concepts/nlu
+   */
+  nluModelUrls: {
+    nlu: string
+    vocab: string
+    metadata: string
+  }
   /** Use this sparingly to refresh the models on device (force overwrite) */
   refreshModels?: boolean
   /** Passed straight to react-native-spokestack */
   spokestackConfig?: Partial<SpokestackConfig>
   /**
-   * Pass the URLs of your NLU model files.
+   * Pass the URLs of your wakeword model files.
    * These models will be automatically downloaded
    * the first time the app opens, and then saved.
-   * This is required for wakeword to work.
+   * If no URLs are provided, the tray will default to
+   * the "Spokestack" wakeword.
    * See https://spokestack.io/docs/Concepts/wakeword-models
    */
   wakewordModelUrls?: {
@@ -131,21 +144,9 @@ interface Config {
     detect: string
     encode: string
   }
-  /**
-   * Pass the URLs of your wakeword model files.
-   * These models will be automatically downloaded
-   * the first time the app opens, and then saved.
-   * This is required for the NLU to work.
-   * See https://spokestack.io/docs/Concepts/nlu
-   */
-  nluModelUrls?: {
-    nlu: string
-    vocab: string
-    metadata: string
-  }
 }
 
-async function init(config: Config = {}) {
+async function init(config: Partial<Config> = {}) {
   if (initialized) {
     return
   }

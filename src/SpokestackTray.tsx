@@ -87,16 +87,16 @@ interface Props {
     utterance?: string
   ) => IntentResult
   /**
-   * The URLs of your wakeword model files.
+   * The URLs of your NLU model files.
    * These models will be automatically downloaded
    * the first time the app opens, and then saved.
-   * This is required for wakeword to work.
-   * See https://spokestack.io/docs/Concepts/wakeword-models
+   * This is required for the NLU to work.
+   * See https://spokestack.io/docs/Concepts/nlu
    */
-  wakewordModelUrls: {
-    filter: string
-    detect: string
-    encode: string
+  nluModelUrls: {
+    nlu: string
+    vocab: string
+    metadata: string
   }
   /** Width (and height) of the mic button */
   buttonWidth?: number
@@ -142,18 +142,6 @@ interface Props {
   /** Minimum height for the tray */
   minHeight?: number
   /**
-   * The URLs of your NLU model files.
-   * These models will be automatically downloaded
-   * the first time the app opens, and then saved.
-   * This is required for the NLU to work.
-   * See https://spokestack.io/docs/Concepts/nlu
-   */
-  nluModelUrls?: {
-    nlu: string
-    vocab: string
-    metadata: string
-  }
-  /**
    * Called whenever the tray has closed
    */
   onClose?: () => void
@@ -195,6 +183,19 @@ interface Props {
   ttsFormat?: TTSFormat
   /** A key for a voice in Spokestack ASR, passed to Spokestack.synthesize */
   voice?: string
+  /**
+   * The URLs of your wakeword model files.
+   * These models will be automatically downloaded
+   * the first time the app opens, and then saved.
+   * If no URLs are provided, the tray will default to
+   * the "Spokestack" wakeword.
+   * See https://spokestack.io/docs/Concepts/wakeword-models
+   */
+  wakewordModelUrls?: {
+    filter: string
+    detect: string
+    encode: string
+  }
 }
 
 interface State {
