@@ -7,6 +7,7 @@ export {
   isInitialized,
   addListener,
   removeListener,
+  addListenerOnce,
   ListenerEvent as SpokestackListenerEvent,
   ListenerType as SpokestackListenerType
 } from './Spokestack'

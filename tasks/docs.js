@@ -85,7 +85,8 @@ data += getModuleFunctions('_src_spokestack_.md', [
   'isStarted',
   'isInitialized',
   'addListener',
-  'removeListener'
+  'removeListener',
+  'addListenerOnce'
 ])
 
 // Add Spokestack tray props

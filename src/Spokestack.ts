@@ -92,7 +92,20 @@ export function removeListener(type: ListenerType, fn: Listener) {
   }
 }
 
-function addListenerOnce(type: ListenerType, fn: Listener) {
+/**
+ * Adds a Spokestack listener to any of Spokestack's events
+ * to be removed the first time it runs.
+ *
+ * ```js
+ * import { addListenerOnce, SpokestackListenerType } from 'react-native-spokestack-tray'
+ *
+ * // ...
+ * addListenerOnce(SpokestackListenerType.INIT, () => {
+ *   console.log('Spokestack initialized')
+ * })
+ * ```
+ */
+export function addListenerOnce(type: ListenerType, fn: Listener) {
   const once: Listener = (e) => {
     fn.call(null, e)
     removeListener(type, once)
