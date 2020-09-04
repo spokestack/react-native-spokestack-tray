@@ -72,6 +72,7 @@ export async function checkSpeech() {
   }
   const mic = await checkPermission(PERMISSIONS.ANDROID.RECORD_AUDIO)
   console.log(`Microphone permission is currently ${mic}.`)
+  return mic
 }
 
 export async function requestSpeech() {
