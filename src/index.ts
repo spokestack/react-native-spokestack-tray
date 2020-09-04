@@ -3,8 +3,12 @@ export {
   listen,
   stopListening,
   isListening,
-  ListenerEvent,
-  ListenerType
+  isStarted,
+  isInitialized,
+  addListener,
+  removeListener,
+  ListenerEvent as SpokestackListenerEvent,
+  ListenerType as SpokestackListenerType
 } from './Spokestack'
 
 export { IntentResult }

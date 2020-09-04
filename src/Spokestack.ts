@@ -55,6 +55,19 @@ function indexOfListener(type: ListenerType, fn: Listener) {
   return listeners ? listeners[type].indexOf(fn) : -1
 }
 
+/**
+ * Add a Spokestack listener to any of Spokestack's events
+ *
+ * ```js
+ * import { addListener, SpokestackListenerType } from 'react-native-spokestack-tray'
+ *
+ * // ...
+ * function initialized() {
+ *   console.log('Spokestack initialized')
+ * }
+ * addListener(SpokestackListenerType.INIT, initialized)
+ * ```
+ */
 export function addListener(type: ListenerType, fn: Listener) {
   // Only add if not present
   if (indexOfListener(type, fn) === -1) {
@@ -62,19 +75,29 @@ export function addListener(type: ListenerType, fn: Listener) {
   }
 }
 
-export function addListenerOnce(type: ListenerType, fn: Listener) {
-  const once: Listener = (e) => {
-    fn.call(null, e)
-    removeListener(type, once)
-  }
-  addListener(type, once)
-}
-
+/**
+ * Remove a Spokestack listener
+ *
+ * ```js
+ * import { removeListener, SpokestackListenerType } from 'react-native-spokestack-tray'
+ *
+ * // ...
+ * removeListener(SpokestackListenerType.INIT, initialized)
+ * ```
+ */
 export function removeListener(type: ListenerType, fn: Listener) {
   const i = indexOfListener(type, fn)
   if (i > -1) {
     listeners[type].splice(i, 1)
   }
+}
+
+function addListenerOnce(type: ListenerType, fn: Listener) {
+  const once: Listener = (e) => {
+    fn.call(null, e)
+    removeListener(type, once)
+  }
+  addListener(type, once)
 }
 
 function execute(type: ListenerType, e: SpokestackEvent) {
@@ -478,29 +501,6 @@ async function synthesizeSpeech(options?: SynthesizeOptions) {
   )
 }
 
-export function isInitialized() {
-  return initialized
-}
-
-export function isStarted() {
-  return started
-}
-
-/**
- * Returns whether Spokestack is currently listening with ASR
- *
- * ```js
- * import { isListening } from 'react-native-spokestack-tray'
- *
- * if (isListening()) {
- *   // ...
- * }
- * ```
- */
-export function isListening() {
-  return listening
-}
-
 /**
  * Run all commands through a queue
  * This avoids several issues, such as calling
@@ -662,4 +662,53 @@ export async function stopListening() {
  */
 export async function synthesize(options?: SynthesizeOptions) {
   return queueCommand('synthesize', synthesizeSpeech.bind(null, options))
+}
+
+/**
+ * Returns whether Spokestack has been initialized.
+ * The tray initializes Spokestack on mount, but is an
+ * async process.
+ *
+ * ```js
+ * import { isInitialized } from 'react-native-spokestack-tray'
+ *
+ * if (isInitialized()) {
+ *   // ...
+ * }
+ * ```
+ */
+export function isInitialized() {
+  return initialized
+}
+
+/**
+ * Returns whether Spokestack has started the speech pipeline.
+ * The tray starts the pipeline when mounted, but this is
+ * an async process.
+ *
+ * ```js
+ * import { isStarted } from 'react-native-spokestack-tray'
+ *
+ * if (isStarted()) {
+ *   // ...
+ * }
+ * ```
+ */
+export function isStarted() {
+  return started
+}
+
+/**
+ * Returns whether Spokestack is currently listening with ASR
+ *
+ * ```js
+ * import { isListening } from 'react-native-spokestack-tray'
+ *
+ * if (isListening()) {
+ *   // ...
+ * }
+ * ```
+ */
+export function isListening() {
+  return listening
 }

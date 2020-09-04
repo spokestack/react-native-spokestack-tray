@@ -81,7 +81,11 @@ data +=
 data += getModuleFunctions('_src_spokestack_.md', [
   'listen',
   'stopListening',
-  'isListening'
+  'isListening',
+  'isStarted',
+  'isInitialized',
+  'addListener',
+  'removeListener'
 ])
 
 // Add Spokestack tray props
@@ -118,9 +122,9 @@ getInterfaceContent('_src_spokestacktray_.intentresult.md').replace(
   }
 )
 
-// Add ListenerEvent definition
-data += '\n---\n\n#### `ListenerEvent`\n'
-data += 'ListenerEvent is passed to some callbacks. '
+// Add SpokestackListenerEvent definition
+data += '\n---\n\n#### `SpokestackListenerEvent`\n'
+data += 'SpokestackListenerEvent is passed to some callbacks. '
 data +=
   'Usually, only `type` and one other property is defined, depending on the context.\n\n'
 getInterfaceContent('_src_spokestack_.listenerevent.md').replace(
@@ -130,9 +134,9 @@ getInterfaceContent('_src_spokestack_.listenerevent.md').replace(
   }
 )
 
-// Add ListenerType enum
-data += '\n---\n\n#### `ListenerType` enum\n'
-data += '`ListenerType` is used in `ListenerEvent`\n'
+// Add SpokestackListenerEvent enum
+data += '\n---\n\n#### `SpokestackListenerType` enum\n'
+data += '`SpokestackListenerType` is used in `SpokestackListenerEvent`\n'
 getEnumContent('_src_spokestack_.listenertype.md').replace(
   rdefaultProps,
   function (all) {
