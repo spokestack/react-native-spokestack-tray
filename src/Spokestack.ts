@@ -286,9 +286,6 @@ async function init(config: Partial<Config> = {}) {
     return
   }
 
-  console.log('Wakeword files downloaded to ', wakewordFiles)
-  console.log('NLU files downloaded to ', nluFiles)
-
   // If any download failed, abort
   if (nluFiles.length !== 3 || wakewordFiles.length !== 3) {
     return

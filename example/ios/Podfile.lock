@@ -267,10 +267,10 @@ PODS:
     - React
   - RNReactNativeHapticFeedback (1.10.0):
     - React
-  - RNSpokestack (3.2.13):
+  - RNSpokestack (3.2.14):
     - React
-    - Spokestack-iOS (= 13.1.3)
-  - Spokestack-iOS (13.1.3):
+    - Spokestack-iOS (= 13.1.4)
+  - Spokestack-iOS (13.1.4):
     - filter_audio (~> 0.5.0)
     - TensorFlowLiteSwift (~> 1.14.0)
   - TensorFlowLiteC (1.14.0)
@@ -437,8 +437,8 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 3eea36d9460c5159b592f9ecbe5a77f8aca98006
   RNPermissions: e29e449d948ba1c04f3bb3bede5c662667543c49
   RNReactNativeHapticFeedback: 22c5ecf474428766c6b148f96f2ff6155cd7225e
-  RNSpokestack: 6fb8917f232055e3b6e4cefbfe549539f9cc4cca
-  Spokestack-iOS: 14f3045f3ad78782fd936a5dcc8148de3578ed61
+  RNSpokestack: ce4d969769b97c850a65d77fc3590290cb86c1dd
+  Spokestack-iOS: 7f713fa52a127e9871d9b8c0cc5f319a002764b2
   TensorFlowLiteC: a6702011fb661928634e59565b5fe262f69692d0
   TensorFlowLiteSwift: ac8c816ae2d65f631a96151e7991c46412aec7eb
   Yoga: 7740b94929bbacbddda59bf115b5317e9a161598

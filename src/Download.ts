@@ -81,12 +81,22 @@ export async function download(
     )
   }
   const config = options.fetchBlobConfig || {}
+  if (!config.appendExt) {
+    config.appendExt = 'tflite'
+  }
+  const path = `${RNFetchBlob.fs.dirs.DocumentDir}/${file.id}.${config.appendExt}`
+  const fileExists = await RNFetchBlob.fs.exists(path)
+
+  if (fileExists && !config.overwrite) {
+    console.log(`Returning existing file at ${path}`)
+    return path
+  }
 
   return RNFetchBlob.config({
     ...config,
-    path: `${RNFetchBlob.fs.dirs.DocumentDir}/${file.id}.${
-      config.appendExt || 'tflite'
-    }`
+    path,
+    // We already returned for overwrite: false
+    overwrite: true
   })
     .fetch('GET', url)
     .then(async (res) => {
