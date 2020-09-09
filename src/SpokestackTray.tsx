@@ -40,6 +40,9 @@ import poweredImage from './images/powered-by-spokestack.png'
 import soundOffImage from './images/icon-sound-off.png'
 import soundOnImage from './images/icon-sound-on.png'
 
+const errorMessage =
+  'Sorry! We hit an error. Please check your network or restart the app and try again.'
+
 export interface IntentResult {
   /**
    * A user-defined key to indicate where the user is in the conversation
@@ -447,8 +450,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   private handleError = (error: Spokestack.ListenerEvent) => {
     this.setState({ listening: false })
     this.addBubble({
-      text:
-        'Sorry! We hit an error. Please check your network or restart the app and try again.',
+      text: errorMessage,
       isLeft: true
     })
     const { onError } = this.props
@@ -651,7 +653,12 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     // Avoid repeating a bubble
     const last = bubbles[bubbles.length - 1]
     if (!last || last.text !== bubble.text || last.isLeft !== bubble.isLeft) {
-      this.setState({ bubbles: bubbles.concat(bubble) })
+      // Only add one bubble with an error message
+      this.setState({
+        bubbles: bubbles
+          .filter((bubble) => bubble.text !== errorMessage)
+          .concat(bubble)
+      })
     }
   }
 
