@@ -74,21 +74,6 @@ const header = '\n---\n\n# Documentation'
 let data =
   read('../README.md').replace(new RegExp(header + '[\\w\\W]+'), '') + header
 
-// Add default exported functions
-data += '\n\n## Spokestack Functions'
-data +=
-  '\n\nThese functions are available as exports from react-native-spokestack-tray\n\n'
-data += getModuleFunctions('_src_spokestack_.md', [
-  'listen',
-  'stopListening',
-  'isListening',
-  'isStarted',
-  'isInitialized',
-  'addListener',
-  'removeListener',
-  'addListenerOnce'
-])
-
 // Add Spokestack tray props
 const defaultOptions = redoLinks(
   read('../docs/classes/_src_spokestacktray_.spokestacktray.md')
@@ -102,7 +87,7 @@ defaultOptions.replace(rdefaultProps, function (all, key, value) {
   return all
 })
 const trayProps = getInterfaceContent('_src_spokestacktray_.props.md')
-data += '\n---\n\n## `<SpokestackTray />` Component Props'
+data += '\n\n## `<SpokestackTray />` Component Props'
 data += trayProps
   // Add in default values to option descriptions
   .replace(rprops, function (all, key) {
@@ -182,6 +167,32 @@ getInterfaceContent('_src_speechbubbles_.bubble.md').replace(rprops, function (
 data += getClassMethods('_src_spokestacktray_.spokestacktray.md', [
   'toggleSilent',
   'isSilent'
+])
+
+// Add default exported functions
+data += '\n---\n\n## Spokestack Functions\n'
+data +=
+  '\nThese functions are available as exports from react-native-spokestack-tray\n\n'
+data += getModuleFunctions('_src_spokestack_.md', [
+  'listen',
+  'stopListening',
+  'isListening',
+  'isStarted',
+  'isInitialized',
+  'addListener',
+  'removeListener',
+  'addListenerOnce'
+])
+
+// Add permissions functions
+
+data += '\n\n## Checking speech permissions\n'
+data +=
+  '\nThese utility functions are used by Spokestack to check microphone permission on iOS and Android and speech recognition permission on iOS.\n'
+
+data += getModuleFunctions('_src_permissions_.md', [
+  'checkSpeech',
+  'requestSpeech'
 ])
 
 // Add license info

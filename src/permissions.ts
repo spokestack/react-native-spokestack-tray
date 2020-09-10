@@ -61,6 +61,20 @@ export function requestPermission(
   })
 }
 
+/**
+ * This function can be used to check whether the user has given
+ * the necessary permission for speech.
+ * On iOS, this includes both microphone and speech recnogition.
+ * On Android, only the microphone is needed.
+ *
+ * ```js
+ * import { checkSpeech } from 'react-native-spokestack-tray'
+ *
+ * // ...
+ *
+ * const hasPermission = await checkSpeech()
+ * ```
+ */
 export async function checkSpeech() {
   if (Platform.OS === 'ios') {
     const mic = await checkPermission(PERMISSIONS.IOS.MICROPHONE)
@@ -75,6 +89,23 @@ export async function checkSpeech() {
   return mic
 }
 
+/**
+ * This function can be used to actually request
+ * the necessary permission for speech.
+ * On iOS, this includes both microphone and speech recnogition.
+ * On Android, only the microphone is needed.
+ *
+ * Note: if the user has declined in the past on iOS,
+ *  the user must be sent to Settings.
+ *
+ * ```js
+ * import { requestSpeech } from 'react-native-spokestack-tray'
+ *
+ * // ...
+ *
+ * const hasPermission = await requestSpeech()
+ * ```
+ */
 export async function requestSpeech() {
   if (Platform.OS === 'ios') {
     return (

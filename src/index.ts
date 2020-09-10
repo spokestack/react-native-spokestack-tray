@@ -12,5 +12,7 @@ export {
   ListenerType as SpokestackListenerType
 } from './Spokestack'
 
+export { checkSpeech, requestSpeech } from './permissions'
+
 export { IntentResult }
 export default SpokestackTray
