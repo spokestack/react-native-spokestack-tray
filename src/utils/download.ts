@@ -85,7 +85,14 @@ export async function download(
     config.appendExt = 'tflite'
   }
   const path = `${RNFetchBlob.fs.dirs.DocumentDir}/${file.id}.${config.appendExt}`
-  const fileExists = await RNFetchBlob.fs.exists(path)
+  let fileExists = false
+  try {
+    fileExists =
+      (await RNFetchBlob.fs.exists(path)) &&
+      (await RNFetchBlob.fs.stat(path)).size > 0
+  } catch (e) {
+    console.log(e)
+  }
 
   if (fileExists && !config.overwrite) {
     console.log(`Returning existing file at ${path}`)
@@ -104,4 +111,11 @@ export async function download(
       console.log(`File saved to ${path}`)
       return path
     })
+}
+
+export async function remove(paths: string | string[]) {
+  if (typeof paths === 'string') {
+    paths = [paths]
+  }
+  return Promise.all(paths.map((path) => RNFetchBlob.fs.unlink(path)))
 }

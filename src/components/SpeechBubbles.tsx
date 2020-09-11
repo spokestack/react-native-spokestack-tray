@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react'
-import { ScrollView, StyleSheet, TextProps } from 'react-native'
+import { ScrollView, StyleSheet } from 'react-native'
 
+import Listening from './Listening'
 import SpeechBubble from './SpeechBubble'
 
 export interface Bubble {
@@ -12,7 +13,8 @@ interface Props {
   backgroundSystem?: string
   backgroundUser?: string
   bubbles: Bubble[]
-  bubbleTextStyle?: TextProps['style']
+  fontFamily: string
+  gradientColors: string[]
   listening?: boolean
 }
 
@@ -20,7 +22,8 @@ export default function SpeechBubbles({
   backgroundSystem,
   backgroundUser,
   bubbles,
-  bubbleTextStyle,
+  fontFamily,
+  gradientColors,
   listening
 }: Props) {
   const scrollView = useRef<ScrollView>()
@@ -36,12 +39,12 @@ export default function SpeechBubbles({
           key={`bubble-${i}`}
           backgroundSystem={backgroundSystem}
           backgroundUser={backgroundUser}
-          textStyle={bubbleTextStyle}
+          textStyle={{ fontFamily }}
           {...bubble}
         />
       ))}
       {listening && (
-        <SpeechBubble backgroundUser={backgroundUser} text={'\u2026'} />
+        <Listening gradientColors={gradientColors} textStyle={{ fontFamily }} />
       )}
     </ScrollView>
   )
@@ -49,7 +52,6 @@ export default function SpeechBubbles({
 
 const styles = StyleSheet.create({
   scrollView: {
-    padding: 20,
-    paddingBottom: 30
+    padding: 20
   }
 })

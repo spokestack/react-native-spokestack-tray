@@ -22,17 +22,16 @@ import {
   ViewStyle
 } from 'react-native'
 import React, { PureComponent } from 'react'
-import SpeechBubbles, { Bubble } from './SpeechBubbles'
+import SpeechBubbles, { Bubble } from './components/SpeechBubbles'
 import {
   SpokestackNLUEvent,
   SpokestackRecognizeEvent,
   TTSFormat
 } from 'react-native-spokestack'
-import { getSilent, setSilent } from './settings'
+import { getSilent, setSilent } from './utils/settings'
 
 import Color from 'color'
 import HapticFeedback from 'react-native-haptic-feedback'
-import LinearGradient from 'react-native-linear-gradient'
 import Video from 'react-native-video'
 import arrowImage from './images/icon-arrow-left.png'
 import micImage from './images/icon-mic.png'
@@ -206,6 +205,7 @@ interface State {
   bubbles: Bubble[]
   height: number
   listening: boolean
+  listeningWidth: number
   loading: boolean
   open: boolean
   playerSource: string
@@ -220,7 +220,6 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   private windowHeight: number
   private panX = new Animated.Value(0)
   private shadowOpacity = new Animated.Value(0)
-  private gradientAnim = new Animated.Value(0)
   private listenWhenDone = false
   private utterance = ''
   private openPanResponder = PanResponder.create({
@@ -294,6 +293,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     bubbles: [],
     height: this.props.startHeight,
     listening: false,
+    listeningWidth: 0,
     loading: false,
     open: false,
     playerSource: '',
@@ -467,15 +467,6 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       useNativeDriver: true,
       toValue: (buttonWidth / 2) * (orientation === 'right' ? -1 : 1)
     }).start()
-    Animated.loop(
-      Animated.timing(this.gradientAnim, {
-        duration: 3000,
-        easing: Easing.linear,
-        isInteraction: false,
-        useNativeDriver: true,
-        toValue: 1
-      })
-    ).start()
   }
 
   private onEnd = () => {
@@ -703,7 +694,6 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       silent
     } = this.state
     const closedXValue = buttonWidth / 2
-    const { width: deviceWidth } = Dimensions.get('window')
     return (
       <Animated.View
         style={[
@@ -774,10 +764,10 @@ export default class SpokestackTray extends PureComponent<Props, State> {
           </View>
         )}
         <Animated.View
-          style={[styles.content, { shadowOpacity: this.shadowOpacity }]}
+          style={[styles.tray, { shadowOpacity: this.shadowOpacity }]}
         >
           <SafeAreaView style={{ flex: 1 }}>
-            <View style={{ flex: 1 }}>
+            <View style={styles.content}>
               <View
                 style={[
                   styles.header,
@@ -795,50 +785,11 @@ export default class SpokestackTray extends PureComponent<Props, State> {
                   {...this.expandPanResponder.panHandlers}
                 >
                   <View style={styles.touchbar} pointerEvents="none" />
-                  <Animated.View
-                    style={[
-                      styles.gradientWrap,
-                      {
-                        opacity: listening ? 1 : 0,
-                        transform: [
-                          {
-                            translateX: this.gradientAnim.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: [0, deviceWidth * 2]
-                            })
-                          }
-                        ]
-                      }
-                    ]}
-                  >
-                    <LinearGradient
-                      colors={gradientColors}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={{ width: deviceWidth }}
-                    />
-                    <LinearGradient
-                      colors={[...gradientColors].reverse()}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={{ width: deviceWidth }}
-                    />
-                    <LinearGradient
-                      colors={gradientColors}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={{ width: deviceWidth }}
-                    />
-                  </Animated.View>
-                  {listening ? (
-                    <Text style={[styles.listeningText, { fontFamily }]}>
-                      LISTENING ...
-                    </Text>
-                  ) : loading ? (
-                    <Text style={[styles.listeningText, { fontFamily }]}>
+                  {loading && (
+                    <Text style={[styles.loadingText, { fontFamily }]}>
                       LOADING ...
                     </Text>
-                  ) : null}
+                  )}
                 </View>
                 <TouchableOpacity
                   accessibilityRole="button"
@@ -866,10 +817,10 @@ export default class SpokestackTray extends PureComponent<Props, State> {
               <SpeechBubbles
                 backgroundSystem={Color(primaryColor).fade(0.9).toString()}
                 bubbles={bubbles}
-                bubbleTextStyle={{ fontFamily }}
+                fontFamily={fontFamily}
+                gradientColors={gradientColors}
                 listening={listening}
               />
-
               <View style={styles.powered} pointerEvents="none">
                 <Image source={poweredImage} style={styles.poweredImage} />
               </View>
@@ -886,7 +837,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0
   },
-  content: {
+  buttonView: {
+    position: 'absolute',
+    top: 7,
+    padding: 8,
+    flexDirection: 'column',
+    justifyContent: 'center'
+  },
+  tray: {
     flex: 1,
     backgroundColor: 'white',
     borderTopLeftRadius: 7,
@@ -898,6 +856,10 @@ const styles = StyleSheet.create({
     },
     shadowRadius: 20,
     elevation: 20
+  },
+  content: {
+    flex: 1,
+    paddingBottom: 30
   },
   header: {
     position: 'relative',
@@ -938,17 +900,9 @@ const styles = StyleSheet.create({
     marginLeft: -20,
     backgroundColor: '#e7ebee'
   },
-  listeningText: {
+  loadingText: {
     fontSize: 14,
     color: 'rgba(0, 0, 0, 0.5)'
-  },
-  gradientWrap: {
-    position: 'absolute',
-    top: -1,
-    width: '300%',
-    right: 0,
-    height: 7,
-    flexDirection: 'row'
   },
   headerButton: {
     justifyContent: 'center',
@@ -958,13 +912,6 @@ const styles = StyleSheet.create({
   },
   silentButton: {
     marginHorizontal: 5
-  },
-  buttonView: {
-    position: 'absolute',
-    top: 7,
-    padding: 8,
-    flexDirection: 'column',
-    justifyContent: 'center'
   },
   arrow: {
     width: 14,

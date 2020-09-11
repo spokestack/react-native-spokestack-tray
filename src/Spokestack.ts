@@ -3,13 +3,13 @@ import RNSpokestack, {
   SpokestackEvent,
   SynthesizeOptions
 } from 'react-native-spokestack'
-import { checkSpeech, requestSpeech } from './permissions'
+import { checkSpeech, requestSpeech } from './utils/permissions'
 
 import { AppState } from 'react-native'
-import { download } from './Download'
-import map from 'lodash/map'
-import merge from 'lodash/merge'
-import rafForeground from './rafForeground'
+import getModels from './utils/getModels'
+import mergeConfig from './utils/mergeConfig'
+import rafForeground from './utils/rafForeground'
+import { remove } from './utils/download'
 
 export enum ListenerType {
   CHANGE = 'change',
@@ -37,6 +37,7 @@ let initialized = false
 let started = false
 let listening = false
 let stopOnError = true
+let retryDownload = true
 const listeners: Listeners = {
   change: [],
   init: [],
@@ -146,7 +147,7 @@ function runNativeCommand(
   })
 }
 
-interface Config {
+export interface SpokestackInitConfig {
   /** Show debug (trace) messages from react-native-spokestack */
   debug?: boolean
   /** Edit the transcript before passing it to onRecognize and classify */
@@ -182,157 +183,23 @@ interface Config {
   }
 }
 
-async function init(config: Partial<Config> = {}) {
+const rformat = /correct format.$/
+
+async function init(config: SpokestackInitConfig): Promise<ListenerEvent> {
   if (initialized) {
     return
   }
   const editTranscript = config.editTranscript || ((transcript) => transcript)
-  let nluFiles: string[] = []
-
-  const wakewordModelUrls = config.wakewordModelUrls
-  if (
-    !wakewordModelUrls ||
-    typeof wakewordModelUrls.filter !== 'string' ||
-    typeof wakewordModelUrls.detect !== 'string' ||
-    typeof wakewordModelUrls.encode !== 'string'
-  ) {
-    console.warn(
-      'Wakeword model URLs not specified (filter, detect, and encode required). Using "Spokestack" wakeword files.'
-    )
-    config.wakewordModelUrls = {
-      filter:
-        'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/filter.tflite',
-      detect:
-        'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/detect.tflite',
-      encode:
-        'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/encode.tflite'
-    }
-  }
-  const wakewordFiles =
-    (await Promise.all(
-      map(config.wakewordModelUrls, (url, name) =>
-        download(
-          url,
-          { id: name },
-          {
-            forceCellular: true,
-            fetchBlobConfig: {
-              appendExt: 'tflite',
-              overwrite: !!config.refreshModels
-            }
-          }
-        )
-      )
-    ).catch((error) => {
-      console.error('Failed to download Spokestack wakeword files', error)
-      execute(ListenerType.ERROR, {
-        error: 'Failed to download Spokestack wakeword files'
-      })
-    })) || []
-
-  const nluModelUrls = config.nluModelUrls
-  if (
-    nluModelUrls &&
-    typeof nluModelUrls.nlu === 'string' &&
-    typeof nluModelUrls.vocab === 'string' &&
-    typeof nluModelUrls.metadata === 'string'
-  ) {
-    nluFiles =
-      (await Promise.all([
-        download(
-          config.nluModelUrls.nlu,
-          { id: 'nlu' },
-          {
-            forceCellular: true,
-            fetchBlobConfig: {
-              appendExt: 'tflite',
-              overwrite: !!config.refreshModels
-            }
-          }
-        ),
-        download(
-          config.nluModelUrls.vocab,
-          { id: 'vocab' },
-          {
-            forceCellular: true,
-            fetchBlobConfig: {
-              appendExt: 'txt',
-              overwrite: !!config.refreshModels
-            }
-          }
-        ),
-        download(
-          config.nluModelUrls.metadata,
-          { id: 'metadata' },
-          {
-            forceCellular: true,
-            fetchBlobConfig: {
-              appendExt: 'json',
-              overwrite: !!config.refreshModels
-            }
-          }
-        )
-      ]).catch((error) => {
-        console.error('Failed to download Spokestack NLU files', error)
-        execute(ListenerType.ERROR, {
-          error: 'Failed to download Spokestack NLU files'
-        })
-      })) || []
-  } else {
-    const error =
-      'NLU model URLs not specified (nlu, vocab, and metadata required). An NLU is required to process speech. See https://spokestack.io/docs/Concepts/nlu for details.'
-    console.error(error)
+  const [nluFiles, wakewordFiles] = await getModels(config, (error) => {
     execute(ListenerType.ERROR, { error })
-    return
-  }
+  })
 
   // If any download failed, abort
   if (nluFiles.length !== 3 || wakewordFiles.length !== 3) {
     return
   }
 
-  const spokestackOpts: SpokestackConfig = merge(
-    {
-      input: 'io.spokestack.spokestack.android.PreASRMicrophoneInput',
-      stages: [
-        'io.spokestack.spokestack.webrtc.AcousticNoiseSuppressor',
-        'io.spokestack.spokestack.webrtc.AutomaticGainControl',
-        'io.spokestack.spokestack.webrtc.VoiceActivityDetector',
-        'io.spokestack.spokestack.wakeword.WakewordTrigger',
-        'io.spokestack.spokestack.android.AndroidSpeechRecognizer',
-        'io.spokestack.spokestack.ActivationTimeout'
-      ],
-      properties: {
-        locale: 'en-US',
-        'wake-filter-path': wakewordFiles[0],
-        'wake-detect-path': wakewordFiles[1],
-        'wake-encode-path': wakewordFiles[2],
-        'ans-policy': 'aggressive',
-        'agc-target-level-dbfs': 3,
-        'agc-compression-gain-db': 15,
-        'vad-mode': 'very-aggressive',
-        'vad-fall-delay': 1000,
-        'wake-threshold': 0.9,
-        'wake-active-min': 2000,
-        'wake-active-max': 6000,
-        'fft-window-size': 512,
-        'fft-hop-length': 10,
-        'pre-emphasis': 0.97,
-        'trace-level': config.debug
-          ? RNSpokestack.TraceLevel.DEBUG
-          : RNSpokestack.TraceLevel.NONE
-      },
-      tts: {
-        ttsServiceClass: 'io.spokestack.spokestack.tts.SpokestackTTSService'
-      },
-      nlu: {
-        'nlu-model-path': nluFiles[0],
-        'wordpiece-vocab-path': nluFiles[1],
-        'nlu-metadata-path': nluFiles[2]
-      }
-    },
-    config.spokestackConfig
-  )
+  const spokestackOpts = mergeConfig(config, nluFiles, wakewordFiles)
 
   // Check for Spokestack client ID and secret
   if (
@@ -426,7 +293,25 @@ async function init(config: Partial<Config> = {}) {
     },
     // Give time to download model files
     60000
-  )
+  ).catch((error) => {
+    if (retryDownload) {
+      // If there's a problem with the format of existing model files,
+      // try redownloading them once to fix them.
+      retryDownload = false
+      if (rformat.test(error.message)) {
+        console.log('Removing model files and retrying init.')
+        return remove(nluFiles.concat(wakewordFiles))
+          .catch((errors) => {
+            console.error(errors)
+            throw new Error(
+              'There was a problem removing stale model files. Please restart the app.'
+            )
+          })
+          .then(() => init(config))
+      }
+    }
+    throw error
+  })
 }
 
 async function startPipeline() {
@@ -453,7 +338,7 @@ async function startPipeline() {
 }
 
 async function stopPipeline() {
-  if (!initialized) {
+  if (!initialized || !started) {
     return false
   }
   console.log('Stopping')
@@ -571,7 +456,7 @@ function queueCommand<T = unknown>(name: string, fn: () => Promise<T>) {
  * }
  * ```
  */
-export async function initialize(config: Config) {
+export async function initialize(config: SpokestackInitConfig) {
   await queueCommand('initialize', init.bind(null, config))
   return initialized
 }
