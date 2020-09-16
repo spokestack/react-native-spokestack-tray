@@ -158,11 +158,12 @@ data += getClassMethods('_src_spokestacktray_.spokestacktray.md', [
 
 // Add Bubble definition
 data += '\n#### `Bubble`\n'
-getInterfaceContent('_src_speechbubbles_.bubble.md').replace(rprops, function (
-  all
-) {
-  data += `\n${all}\n`
-})
+getInterfaceContent('_src_components_speechbubbles_.bubble.md').replace(
+  rprops,
+  function (all) {
+    data += `\n${all}\n`
+  }
+)
 
 data += getClassMethods('_src_spokestacktray_.spokestacktray.md', [
   'toggleSilent',
@@ -190,7 +191,7 @@ data += '\n\n## Checking speech permissions\n'
 data +=
   '\nThese utility functions are used by Spokestack to check microphone permission on iOS and Android and speech recognition permission on iOS.\n'
 
-data += getModuleFunctions('_src_permissions_.md', [
+data += getModuleFunctions('_src_utils_permissions_.md', [
   'checkSpeech',
   'requestSpeech'
 ])
