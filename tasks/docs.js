@@ -66,8 +66,10 @@ function getModuleFunctions(filename, functions) {
     .join('\n\n')
 }
 
-const rprops = /\*\*(\w+)\*\*\??\s*: \*\w+\*/g
-const rdefaultProps = /\*\*(\w+)\*\*: (?:\*\w+?\* )?= (["\w-.]+)/g
+// const rprops = /\*\*(\w+)\*\*\??\s*: \*\w+\*/g
+const rprops = /(?:`Optional` )?\*\*(\w+)\*\*\s*: [^\n]+/g
+const rdefaultProps = /`(\w+)` \|[^|]+\|\s*([^|]+) |/g
+const renum = /\*\*(\w+)\*\*: \{\} = ([^\n]+)/g
 
 // Start with the README
 const header = '\n---\n\n# Documentation'
@@ -79,7 +81,7 @@ const defaultOptions = redoLinks(
   read('../docs/classes/_src_spokestacktray_.spokestacktray.md')
 )
   // Remove unwanted text
-  .replace(/[\w\W]+\*\*defaultProps\*\*: \*object\*/, '')
+  .replace(/[\w\W]+\*\*defaultProps\*\*: object/, '')
 
 const parsedDefaults = {}
 defaultOptions.replace(rdefaultProps, function (all, key, value) {
@@ -123,12 +125,14 @@ getInterfaceContent('_src_spokestack_.listenerevent.md').replace(
 // Add SpokestackListenerEvent enum
 data += '\n---\n\n#### `SpokestackListenerType` enum\n'
 data += '`SpokestackListenerType` is used in `SpokestackListenerEvent`\n'
-getEnumContent('_src_spokestack_.listenertype.md').replace(
-  rdefaultProps,
-  function (all) {
-    data += `\n${all}\n`
-  }
-)
+getEnumContent('_src_spokestack_.listenertype.md').replace(renum, function (
+  all,
+  key,
+  value
+) {
+  data += `\n**${key}** = ${value}\n`
+  return all
+})
 
 // Add SpokestackTray methods
 data += '\n---\n\n## `<SpokestackTray />` Component Methods\n'

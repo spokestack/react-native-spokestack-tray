@@ -22,9 +22,9 @@ PODS:
     - DoubleConversion
     - glog
   - glog (0.3.5)
-  - Permission-Microphone (2.2.0):
+  - Permission-Microphone (2.2.2):
     - RNPermissions
-  - Permission-SpeechRecognition (2.2.0):
+  - Permission-SpeechRecognition (2.2.2):
     - RNPermissions
   - RCTRequired (0.63.3)
   - RCTTypeSafety (0.63.3):
@@ -192,8 +192,8 @@ PODS:
     - React-cxxreact (= 0.63.3)
     - React-jsi (= 0.63.3)
   - React-jsinspector (0.63.3)
-  - react-native-netinfo (5.9.6):
-    - React
+  - react-native-netinfo (5.9.7):
+    - React-Core
   - react-native-video (5.1.0-alpha8):
     - React
     - react-native-video/Video (= 5.1.0-alpha8)
@@ -263,8 +263,8 @@ PODS:
     - React-Core
   - RNCAsyncStorage (1.12.0):
     - React
-  - RNPermissions (2.2.0):
-    - React
+  - RNPermissions (2.2.2):
+    - React-Core
   - RNReactNativeHapticFeedback (1.10.0):
     - React
   - RNSpokestack (3.2.14):
@@ -409,8 +409,8 @@ SPEC CHECKSUMS:
   filter_audio: 1f071989c5a9ad0e0c9c45d08084513deb30d065
   Folly: b73c3869541e86821df3c387eb0af5f65addfab4
   glog: 40a13f7840415b9a77023fbcae0f1e6f43192af3
-  Permission-Microphone: 2fb25d7e1efe36e82bcff52ce72d03ced7b6d474
-  Permission-SpeechRecognition: d5f1140d2e37d3041dc54b3c9a730d671541285f
+  Permission-Microphone: b3de743c3ffa4f6de043119c7cbd092c0d1f9b35
+  Permission-SpeechRecognition: 5f0ade4d1fb78994c350d8a4f149c458854d9bfe
   RCTRequired: 48884c74035a0b5b76dbb7a998bd93bcfc5f2047
   RCTTypeSafety: edf4b618033c2f1c5b7bc3d90d8e085ed95ba2ab
   React: f36e90f3ceb976546e97df3403e37d226f79d0e3
@@ -421,7 +421,7 @@ SPEC CHECKSUMS:
   React-jsi: df07aa95b39c5be3e41199921509bfa929ed2b9d
   React-jsiexecutor: b56c03e61c0dd5f5801255f2160a815f4a53d451
   React-jsinspector: 8e68ffbfe23880d3ee9bafa8be2777f60b25cbe2
-  react-native-netinfo: d2c312fa4b151214e1d5c8456ddb5f28ff24a576
+  react-native-netinfo: e36c1bb6df27ab84aa933679b3f5bbf9d180b18f
   react-native-video: 8d97379f3c2322a569f1e27542ad1a646cad9444
   React-RCTActionSheet: 53ea72699698b0b47a6421cb1c8b4ab215a774aa
   React-RCTAnimation: 1befece0b5183c22ae01b966f5583f42e69a83c2
@@ -435,7 +435,7 @@ SPEC CHECKSUMS:
   ReactCommon: 4167844018c9ed375cc01a843e9ee564399e53c3
   rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNCAsyncStorage: 3eea36d9460c5159b592f9ecbe5a77f8aca98006
-  RNPermissions: e29e449d948ba1c04f3bb3bede5c662667543c49
+  RNPermissions: 067727df624665d4a6c8e2cffcc172ba608b96ed
   RNReactNativeHapticFeedback: 22c5ecf474428766c6b148f96f2ff6155cd7225e
   RNSpokestack: ce4d969769b97c850a65d77fc3590290cb86c1dd
   Spokestack-iOS: 7f713fa52a127e9871d9b8c0cc5f319a002764b2
