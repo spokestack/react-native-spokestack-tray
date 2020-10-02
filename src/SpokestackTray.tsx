@@ -31,16 +31,18 @@ import {
 import { getSilent, setSilent } from './utils/settings'
 
 import Color from 'color'
+import Handle from './components/Handle'
 import HapticFeedback from 'react-native-haptic-feedback'
 import Video from 'react-native-video'
 import arrowImage from './images/icon-arrow-left.png'
-import micImage from './images/icon-mic.png'
 import poweredImage from './images/powered-by-spokestack.png'
 import soundOffImage from './images/icon-sound-off.png'
 import soundOnImage from './images/icon-sound-on.png'
 
 const errorMessage =
   'Sorry! We hit an error. Please check your network or restart the app and try again.'
+
+const EXTEND_WIDTH = 70
 
 export interface IntentResult {
   /**
@@ -101,6 +103,8 @@ interface Props {
     vocab: string
     metadata: string
   }
+  /** Border color for the tray (also as the touchbar background color) */
+  borderColor?: string
   /** Width (and height) of the mic button */
   buttonWidth?: number
   /** How long to wait to close the tray after speaking (ms) */
@@ -203,6 +207,8 @@ interface Props {
 
 interface State {
   bubbles: Bubble[]
+  buttonPadding: number
+  extend: boolean
   height: number
   listening: boolean
   listeningWidth: number
@@ -267,6 +273,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   })
 
   static defaultProps: Partial<Props> = {
+    borderColor: '#e7ebee',
     buttonWidth: 60,
     closeDelay: 0,
     duration: 500,
@@ -291,6 +298,8 @@ export default class SpokestackTray extends PureComponent<Props, State> {
 
   state: State = {
     bubbles: [],
+    buttonPadding: this.props.buttonWidth,
+    extend: false,
     height: this.props.startHeight,
     listening: false,
     listeningWidth: 0,
@@ -461,12 +470,27 @@ export default class SpokestackTray extends PureComponent<Props, State> {
 
   private showHandle = () => {
     const { buttonWidth, easing, orientation } = this.props
+    const { extend } = this.state
     Animated.timing(this.panX, {
       duration: 200,
       easing,
       useNativeDriver: true,
-      toValue: (buttonWidth / 2) * (orientation === 'right' ? -1 : 1)
-    }).start()
+      toValue:
+        (buttonWidth + (extend ? EXTEND_WIDTH : 0)) *
+        (orientation === 'right' ? -1 : 1)
+    }).start(() => {
+      if (!extend) {
+        this.setState({ buttonPadding: buttonWidth })
+      }
+      setTimeout(() => {
+        const newExtend = !extend
+        const state = { extend: newExtend }
+        if (newExtend) {
+          ;(state as State).buttonPadding = buttonWidth + EXTEND_WIDTH
+        }
+        this.setState(state, this.showHandle)
+      }, 2000)
+    })
   }
 
   private onEnd = () => {
@@ -483,17 +507,10 @@ export default class SpokestackTray extends PureComponent<Props, State> {
 
   private constrainX = (dx: number) => {
     const { buttonWidth, orientation } = this.props
-    const closedXValue = buttonWidth / 2
     if (orientation === 'left') {
-      return Math.min(
-        Math.max(closedXValue, dx),
-        this.windowWidth + closedXValue
-      )
+      return Math.min(Math.max(buttonWidth, dx), this.windowWidth + buttonWidth)
     }
-    return Math.min(
-      Math.max(-this.windowWidth - closedXValue, dx),
-      -closedXValue
-    )
+    return Math.min(Math.max(-this.windowWidth - buttonWidth, dx), -buttonWidth)
   }
 
   private constrainHeight = (dy: number) => {
@@ -528,7 +545,6 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     const { buttonWidth, duration, easing, orientation } = this.props
     const { listening } = this.state
     this.windowWidth = Dimensions.get('window').width
-    const closedXValue = buttonWidth / 2
     Animated.parallel([
       Animated.timing(this.panX, {
         duration,
@@ -537,11 +553,11 @@ export default class SpokestackTray extends PureComponent<Props, State> {
         toValue:
           orientation === 'left'
             ? shouldOpen
-              ? this.windowWidth + closedXValue
-              : closedXValue
+              ? this.windowWidth + buttonWidth
+              : buttonWidth
             : shouldOpen
-            ? -this.windowWidth - closedXValue
-            : -closedXValue
+            ? -this.windowWidth - buttonWidth
+            : -buttonWidth
       }),
       Animated.timing(this.shadowOpacity, {
         duration,
@@ -674,6 +690,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
 
   render() {
     const {
+      borderColor,
       buttonWidth,
       fontFamily,
       gradientColors,
@@ -685,6 +702,8 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     } = this.props
     const {
       bubbles,
+      buttonPadding,
+      extend,
       height,
       listening,
       loading,
@@ -693,22 +712,21 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       pressed,
       silent
     } = this.state
-    const closedXValue = buttonWidth / 2
     return (
       <Animated.View
         style={[
           styles.container,
           orientation === 'left'
             ? {
-                paddingRight: closedXValue,
+                paddingRight: buttonPadding,
                 right: '100%'
               }
             : {
-                paddingLeft: closedXValue,
+                paddingLeft: buttonPadding,
                 left: '100%'
               },
           {
-            width: this.windowWidth + closedXValue,
+            width: this.windowWidth + buttonWidth,
             height,
             transform: [{ translateX: this.panX }]
           },
@@ -737,40 +755,35 @@ export default class SpokestackTray extends PureComponent<Props, State> {
           />
         )}
         {!open && (
-          <View
-            style={[
-              styles.buttonView,
-              orientation === 'left'
-                ? {
-                    right: 0,
-                    alignItems: 'flex-end'
-                  }
-                : {
-                    left: 0,
-                    alignItems: 'flex-start'
-                  },
-              {
-                width: buttonWidth,
-                height: buttonWidth,
-                borderRadius: buttonWidth,
-                backgroundColor: pressed
-                  ? Color(primaryColor).darken(0.2).toString()
-                  : primaryColor
-              }
-            ]}
+          <Handle
             {...this.openPanResponder.panHandlers}
-          >
-            <Image source={micImage} style={styles.mic} />
-          </View>
+            buttonWidth={buttonWidth}
+            extend={extend}
+            extendWidth={EXTEND_WIDTH}
+            fontFamily={fontFamily}
+            gradientColors={gradientColors}
+            orientation={orientation}
+            style={{
+              backgroundColor: pressed
+                ? Color(primaryColor).darken(0.2).toString()
+                : primaryColor
+            }}
+          />
         )}
         <Animated.View
-          style={[styles.tray, { shadowOpacity: this.shadowOpacity }]}
+          style={[
+            styles.tray,
+            { borderColor, shadowOpacity: this.shadowOpacity }
+          ]}
         >
           <SafeAreaView style={{ flex: 1 }}>
             <View style={styles.content}>
               <View
                 style={[
                   styles.header,
+                  {
+                    borderBottomColor: borderColor
+                  },
                   orientation === 'left'
                     ? {
                         flexDirection: 'row'
@@ -784,7 +797,10 @@ export default class SpokestackTray extends PureComponent<Props, State> {
                   style={styles.resizer}
                   {...this.expandPanResponder.panHandlers}
                 >
-                  <View style={styles.touchbar} pointerEvents="none" />
+                  <View
+                    style={[styles.touchbar, { backgroundColor: borderColor }]}
+                    pointerEvents="none"
+                  />
                   {loading && (
                     <Text style={[styles.loadingText, { fontFamily }]}>
                       LOADING ...
@@ -837,16 +853,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0
   },
-  buttonView: {
-    position: 'absolute',
-    top: 7,
-    padding: 8,
-    flexDirection: 'column',
-    justifyContent: 'center'
-  },
   tray: {
     flex: 1,
     backgroundColor: 'white',
+    borderWidth: 1,
     borderTopLeftRadius: 7,
     borderTopRightRadius: 7,
     shadowColor: '#262226',
@@ -872,8 +882,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 7,
     borderTopRightRadius: 7,
     overflow: 'hidden',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e7ebee'
+    borderBottomWidth: 1
   },
   resizer: {
     position: 'absolute',
@@ -897,8 +906,7 @@ const styles = StyleSheet.create({
     height: 3,
     top: 10,
     left: '50%',
-    marginLeft: -20,
-    backgroundColor: '#e7ebee'
+    marginLeft: -20
   },
   loadingText: {
     fontSize: 14,
@@ -916,10 +924,6 @@ const styles = StyleSheet.create({
   arrow: {
     width: 14,
     height: 14
-  },
-  mic: {
-    width: 20,
-    height: 20
   },
   powered: {
     position: 'absolute',
