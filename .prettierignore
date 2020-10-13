@@ -13,3 +13,4 @@ example/ios/**
 example/android/**
 docs/**
 coverage/**
+lib/**
