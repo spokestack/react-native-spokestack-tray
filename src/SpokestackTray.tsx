@@ -24,6 +24,7 @@ import {
 import React, { PureComponent } from 'react'
 import SpeechBubbles, { Bubble } from './components/SpeechBubbles'
 import {
+  SpokestackConfig,
   SpokestackNLUEvent,
   SpokestackRecognizeEvent,
   TTSFormat
@@ -178,6 +179,13 @@ interface Props {
   soundOnImage?: React.ReactNode
   /** Replace the sound off image by passing an <Image /> */
   soundOffImage?: React.ReactNode
+  /**
+   * Pass options directly to the Spokestack.initialize()
+   * function from react-native-spokestack.
+   * See https://www.spokestack.io/docs/React%20Native/getting-started#configuring-spokestack
+   * for available options.
+   */
+  spokestackConfig?: Partial<SpokestackConfig>
   /** Starting height for tray */
   startHeight?: number
   /** This style prop is passed to the tray's container */
@@ -309,22 +317,23 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       debug,
       nluModelUrls,
       refreshModels,
+      spokestackConfig = {},
       wakewordModelUrls
     } = this.props
     this.initState()
     this.addListeners()
+
+    spokestackConfig.tts = spokestackConfig.tts || {}
+    spokestackConfig.tts['spokestack-id'] = clientId
+    spokestackConfig.tts['spokestack-secret'] = clientSecret
+
     const initialized = await Spokestack.initialize({
       debug,
       editTranscript: this.props.editTranscript,
       nluModelUrls,
       refreshModels,
       wakewordModelUrls,
-      spokestackConfig: {
-        tts: {
-          'spokestack-id': clientId,
-          'spokestack-secret': clientSecret
-        }
-      }
+      spokestackConfig
     })
     if (initialized) {
       Spokestack.start().then(this.showHandle)
