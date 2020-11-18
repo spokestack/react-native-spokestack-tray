@@ -21,14 +21,15 @@ import {
   View,
   ViewStyle
 } from 'react-native'
-import React, { PureComponent } from 'react'
-import SpeechBubbles, { Bubble } from './components/SpeechBubbles'
 import {
+  PipelineProfile,
   SpokestackConfig,
   SpokestackNLUEvent,
   SpokestackRecognizeEvent,
   TTSFormat
 } from 'react-native-spokestack'
+import React, { PureComponent } from 'react'
+import SpeechBubbles, { Bubble } from './components/SpeechBubbles'
 import { getSilent, setSilent } from './utils/settings'
 
 import Color from 'color'
@@ -162,6 +163,23 @@ interface Props {
    * and is used in the mic button and speech bubbles.
    */
   primaryColor?: string
+  /**
+   * The Spokestack config profile to pass to
+   * react-native-spokestack.
+   * These are available from react-native-spokestack
+   * starting in version 4.0.0.
+   *
+   * ```js
+   * import SpokestackTray from 'react-native-spokestack-tray'
+   * import { PipelineProfile } from 'react-native-spokestack'
+   *
+   * // ...
+   * <SpokestackTray
+   *  profile={PipelineProfile.TFLITE_WAKEWORD_SPOKESTACK_ASR}
+   * // ...
+   * ```
+   */
+  profile?: PipelineProfile
   /**
    * Use this sparingly to refresh the
    * wakeword and NLU models on device
@@ -316,6 +334,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       clientSecret,
       debug,
       nluModelUrls,
+      profile,
       refreshModels,
       spokestackConfig = {},
       wakewordModelUrls
@@ -323,14 +342,13 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     this.initState()
     this.addListeners()
 
-    spokestackConfig.tts = spokestackConfig.tts || {}
-    spokestackConfig.tts['spokestack-id'] = clientId
-    spokestackConfig.tts['spokestack-secret'] = clientSecret
-
     const initialized = await Spokestack.initialize({
+      clientId,
+      clientSecret,
       debug,
       editTranscript: this.props.editTranscript,
       nluModelUrls,
+      profile,
       refreshModels,
       wakewordModelUrls,
       spokestackConfig

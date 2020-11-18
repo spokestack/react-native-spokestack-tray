@@ -8,30 +8,27 @@ export default function mergeConfig(
   nluFiles: string[],
   wakewordFiles: string[]
 ): SpokestackConfig {
+  const hasWakeword =
+    !!wakewordFiles.length &&
+    wakewordFiles.every((path) => typeof path === 'string')
+  const hasNLU =
+    !!nluFiles.length && nluFiles.every((path) => typeof path === 'string')
   return merge(
     {
-      input: 'io.spokestack.spokestack.android.PreASRMicrophoneInput',
-      stages: [
-        'io.spokestack.spokestack.webrtc.AcousticNoiseSuppressor',
-        'io.spokestack.spokestack.webrtc.AutomaticGainControl',
-        'io.spokestack.spokestack.webrtc.VoiceActivityDetector',
-        'io.spokestack.spokestack.wakeword.WakewordTrigger',
-        'io.spokestack.spokestack.android.AndroidSpeechRecognizer',
-        'io.spokestack.spokestack.ActivationTimeout'
-      ],
-      tts: {
-        ttsServiceClass: 'io.spokestack.spokestack.tts.SpokestackTTSService'
-      },
-      nlu: {
-        'nlu-model-path': nluFiles[0],
-        'wordpiece-vocab-path': nluFiles[1],
-        'nlu-metadata-path': nluFiles[2]
-      },
       properties: {
-        locale: 'en-US',
-        'wake-filter-path': wakewordFiles[0],
-        'wake-detect-path': wakewordFiles[1],
-        'wake-encode-path': wakewordFiles[2],
+        'spokestack-id': config.clientId,
+        'spokestack-secret': config.clientSecret,
+        'trace-level': config.debug
+          ? RNSpokestack.TraceLevel.DEBUG
+          : RNSpokestack.TraceLevel.NONE
+      },
+      pipeline: {
+        // The default profile depends on whether wakeword models are present
+        profile:
+          config.profile ||
+          (hasWakeword
+            ? RNSpokestack.PipelineProfile.TFLITE_WAKEWORD_NATIVE_ASR
+            : RNSpokestack.PipelineProfile.PTT_NATIVE_ASR),
         'ans-policy': 'aggressive',
         'agc-target-level-dbfs': 3,
         'agc-compression-gain-db': 15,
@@ -42,10 +39,21 @@ export default function mergeConfig(
         'wake-active-max': 6000,
         'fft-window-size': 512,
         'fft-hop-length': 10,
-        'pre-emphasis': 0.97,
-        'trace-level': config.debug
-          ? RNSpokestack.TraceLevel.DEBUG
-          : RNSpokestack.TraceLevel.NONE
+        'pre-emphasis': 0.97
+      }
+    },
+    hasWakeword && {
+      pipeline: {
+        'wake-filter-path': wakewordFiles[0],
+        'wake-detect-path': wakewordFiles[1],
+        'wake-encode-path': wakewordFiles[2]
+      }
+    },
+    hasNLU && {
+      nlu: {
+        'nlu-model-path': nluFiles[0],
+        'wordpiece-vocab-path': nluFiles[1],
+        'nlu-metadata-path': nluFiles[2]
       }
     },
     config.spokestackConfig

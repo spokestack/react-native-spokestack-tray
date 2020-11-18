@@ -16,7 +16,8 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "paths": {
-      "react-native-spokestack-tray": ["./src/index"]
+      "react-native-spokestack-tray": ["./src/index"],
+      "react-native-spokestack": ["./types/react-native-spokestack"]
     },
     "resolveJsonModule": true,
     "skipLibCheck": true,

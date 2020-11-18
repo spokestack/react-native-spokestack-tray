@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "exclude": ["node_modules", "examples", "test"],
   "compilerOptions": {
-    "types": ["./types/declaration"]
+    "types": ["./types/declaration"],
+    "react-native-spokestack": ["./types/react-native-spokestack"]
   }
 }

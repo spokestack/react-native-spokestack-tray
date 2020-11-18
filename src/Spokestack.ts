@@ -1,4 +1,5 @@
 import RNSpokestack, {
+  PipelineProfile,
   SpokestackConfig,
   SpokestackEvent,
   SynthesizeOptions
@@ -148,6 +149,20 @@ function runNativeCommand(
 }
 
 export interface SpokestackInitConfig {
+  /**
+   * Your Spokestack tokens generated in your Spokestack account
+   * at https://spokestack.io/account.
+   * Create an account for free then generate a token.
+   * This is from the "ID" field.
+   */
+  clientId: string
+  /**
+   * Your Spokestack tokens generated in your Spokestack account
+   * at https://spokestack.io/account.
+   * Create an account for free then generate a token.
+   * This is from the "secret" field.
+   */
+  clientSecret: string
   /** Show debug (trace) messages from react-native-spokestack */
   debug?: boolean
   /** Edit the transcript before passing it to onRecognize and classify */
@@ -164,6 +179,13 @@ export interface SpokestackInitConfig {
     vocab: string
     metadata: string
   }
+  /**
+   * The Spokestack config profile to pass to
+   * react-native-spokestack.
+   * These are available from react-native-spokestack
+   * starting in version 4.0.0.
+   */
+  profile?: PipelineProfile
   /** Use this sparingly to refresh the models on device (force overwrite) */
   refreshModels?: boolean
   /** Passed straight to react-native-spokestack */
@@ -203,8 +225,8 @@ async function init(config: SpokestackInitConfig): Promise<ListenerEvent> {
 
   // Check for Spokestack client ID and secret
   if (
-    !spokestackOpts.tts['spokestack-id'] ||
-    !spokestackOpts.tts['spokestack-secret']
+    !spokestackOpts.properties['spokestack-id'] ||
+    !spokestackOpts.properties['spokestack-secret']
   ) {
     const error =
       'Spokestack client ID and secret are required. Go to https://spokestack.io/account to create a free token.'

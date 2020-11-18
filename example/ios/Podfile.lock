@@ -267,15 +267,19 @@ PODS:
     - React-Core
   - RNReactNativeHapticFeedback (1.11.0):
     - React-Core
-  - RNSpokestack (3.2.14):
+  - RNSpokestack (4.0.0):
     - React
-    - Spokestack-iOS (= 13.1.4)
-  - Spokestack-iOS (13.1.4):
+    - Spokestack-iOS (= 14.0.1)
+  - Spokestack-iOS (14.0.1):
     - filter_audio (~> 0.5.0)
-    - TensorFlowLiteSwift (~> 1.14.0)
-  - TensorFlowLiteC (1.14.0)
-  - TensorFlowLiteSwift (1.14.0):
-    - TensorFlowLiteC (= 1.14.0)
+    - TensorFlowLiteSwift (~> 2.3.0)
+  - TensorFlowLiteC (2.3.0):
+    - TensorFlowLiteC/Core (= 2.3.0)
+  - TensorFlowLiteC/Core (2.3.0)
+  - TensorFlowLiteSwift (2.3.0):
+    - TensorFlowLiteSwift/Core (= 2.3.0)
+  - TensorFlowLiteSwift/Core (2.3.0):
+    - TensorFlowLiteC (= 2.3.0)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -437,10 +441,10 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: cb9a623793918c6699586281f0b51cbc38f046f9
   RNPermissions: 067727df624665d4a6c8e2cffcc172ba608b96ed
   RNReactNativeHapticFeedback: 653a8c126a0f5e88ce15ffe280b3ff37e1fbb285
-  RNSpokestack: ce4d969769b97c850a65d77fc3590290cb86c1dd
-  Spokestack-iOS: 7f713fa52a127e9871d9b8c0cc5f319a002764b2
-  TensorFlowLiteC: a6702011fb661928634e59565b5fe262f69692d0
-  TensorFlowLiteSwift: ac8c816ae2d65f631a96151e7991c46412aec7eb
+  RNSpokestack: fb32253806730fb8578292b7c2d687296a4f7068
+  Spokestack-iOS: 4818bc2e65b71558dcce55d23a599e9b73c16411
+  TensorFlowLiteC: 51f50caf5777f740a70e2c1a5dbdc149e7aeb50b
+  TensorFlowLiteSwift: fb152cc1eec36b25b03a23c07f5d58113170af58
   Yoga: 7d13633d129fd179e01b8953d38d47be90db185a
 
 PODFILE CHECKSUM: 1264cc60caaf122542f699770881d33b14ab60ac

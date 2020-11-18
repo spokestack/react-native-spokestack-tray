@@ -21,7 +21,7 @@
     "react-native-haptic-feedback": "^1.11.0",
     "react-native-linear-gradient": "^2.5.6",
     "react-native-permissions": "^2.2.2",
-    "react-native-spokestack": "3.2.14",
+    "react-native-spokestack": "4.0.0",
     "react-native-video": "^5.1.0-alpha8",
     "rn-fetch-blob": "^0.12.0"
   },
