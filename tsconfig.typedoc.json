@@ -3,6 +3,8 @@
   "exclude": ["node_modules", "examples", "test"],
   "compilerOptions": {
     "types": ["./types/declaration"],
-    "react-native-spokestack": ["./types/react-native-spokestack"]
+    "paths": {
+      "react-native-spokestack": ["./types/react-native-spokestack"]
+    }
   }
 }

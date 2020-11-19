@@ -69,7 +69,7 @@ function getModuleFunctions(filename, functions) {
 // const rprops = /\*\*(\w+)\*\*\??\s*: \*\w+\*/g
 const rprops = /(?:`Optional` )?\*\*(\w+)\*\*\s*: [^\n]+/g
 const rdefaultProps = /`(\w+)` \|[^|]+\|\s*([^|]+) |/g
-const renum = /\*\*(\w+)\*\*: \{\} = ([^\n]+)/g
+const renum = /\*\*(\w+)\*\*:\s*=\s*([^\n]+)/g
 
 // Start with the README
 const header = '\n---\n\n# Documentation'
