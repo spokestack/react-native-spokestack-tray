@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.json",
-  "exclude": ["node_modules", "examples", "test"],
+  "exclude": ["node_modules", "example", "test"],
   "compilerOptions": {
     "types": ["./types/declaration"],
     "paths": {

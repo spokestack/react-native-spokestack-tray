@@ -66,7 +66,6 @@ function getModuleFunctions(filename, functions) {
     .join('\n\n')
 }
 
-// const rprops = /\*\*(\w+)\*\*\??\s*: \*\w+\*/g
 const rprops = /(?:`Optional` )?\*\*(\w+)\*\*\s*: [^\n]+/g
 const rdefaultProps = /`(\w+)` \|[^|]+\|\s*([^|]+) |/g
 const renum = /\*\*(\w+)\*\*:\s*=\s*([^\n]+)/g
