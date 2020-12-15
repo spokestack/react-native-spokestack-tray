@@ -124,14 +124,13 @@ getInterfaceContent('_src_spokestack_.listenerevent.md').replace(
 // Add SpokestackListenerEvent enum
 data += '\n---\n\n#### `SpokestackListenerType` enum\n'
 data += '`SpokestackListenerType` is used in `SpokestackListenerEvent`\n'
-getEnumContent('_src_spokestack_.listenertype.md').replace(renum, function (
-  all,
-  key,
-  value
-) {
-  data += `\n**${key}** = ${value}\n`
-  return all
-})
+getEnumContent('_src_spokestack_.listenertype.md').replace(
+  renum,
+  function (all, key, value) {
+    data += `\n**${key}** = ${value}\n`
+    return all
+  }
+)
 
 // Add SpokestackTray methods
 data += '\n---\n\n## `<SpokestackTray />` Component Methods\n'
