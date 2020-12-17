@@ -32,13 +32,21 @@ export default function App() {
           return handleIntent(intent, slots, utterance)
         }}
         sayGreeting={sayGreeting}
-        nluModelUrls={{
-          nlu:
+        nlu={{
+          model:
             'https://d3dmqd7cy685il.cloudfront.net/nlu/production/shared/XtASJqxkO6UwefOzia-he2gnIMcBnR2UCF-VyaIy-OI/nlu.tflite',
           vocab:
             'https://d3dmqd7cy685il.cloudfront.net/nlu/production/shared/XtASJqxkO6UwefOzia-he2gnIMcBnR2UCF-VyaIy-OI/vocab.txt',
           metadata:
             'https://d3dmqd7cy685il.cloudfront.net/nlu/production/shared/XtASJqxkO6UwefOzia-he2gnIMcBnR2UCF-VyaIy-OI/metadata.json'
+        }}
+        wakeword={{
+          filter:
+            'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/filter.tflite',
+          detect:
+            'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/detect.tflite',
+          encode:
+            'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/encode.tflite'
         }}
       />
     </View>

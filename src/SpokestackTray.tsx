@@ -1,6 +1,3 @@
-// @refresh reset
-import * as Spokestack from './Spokestack'
-
 import {
   Animated,
   AppState,
@@ -21,21 +18,27 @@ import {
   View,
   ViewStyle
 } from 'react-native'
-import {
-  PipelineProfile,
-  SpokestackConfig,
-  SpokestackNLUEvent,
-  SpokestackRecognizeEvent,
-  TTSFormat
-} from 'react-native-spokestack'
 import React, { PureComponent } from 'react'
 import SpeechBubbles, { Bubble } from './components/SpeechBubbles'
+import Spokestack, {
+  PipelineProfile,
+  SpokestackConfig,
+  SpokestackErrorEvent,
+  SpokestackNLUResult,
+  SpokestackRecognizeEvent,
+  SpokestackTraceEvent,
+  TTSFormat,
+  TraceLevel
+} from 'react-native-spokestack'
 import { getSilent, setSilent } from './utils/settings'
+import { listen, stopListening } from './Spokestack'
 
 import Color from 'color'
 import HapticFeedback from 'react-native-haptic-feedback'
 import Video from 'react-native-video'
 import arrowImage from './images/icon-arrow-left.png'
+import { checkSpeech } from './utils/permissions'
+import merge from 'lodash/merge'
 import micImage from './images/icon-mic.png'
 import poweredImage from './images/powered-by-spokestack.png'
 import soundOffImage from './images/icon-sound-off.png'
@@ -92,17 +95,37 @@ interface Props {
     utterance?: string
   ) => IntentResult
   /**
-   * The URLs of your NLU model files.
-   * These models will be automatically downloaded
-   * the first time the app opens, and then saved.
-   * This is required for the NLU to work.
-   * See https://spokestack.io/docs/Concepts/nlu
+   * The NLU Tensorflow-Lite model (.tflite), JSON metadata, and NLU vocabulary (.txt)
+   *
+   * All 3 fields accepts 2 types of values.
+   * 1. A string representing a remote URL from which to download and cache the file (presumably from a CDN).
+   * 2. A source object retrieved by a `require` or `import` (e.g. `model: require('./nlu.tflite')`)
+   *
+   * See https://spokestack.io/docs/concepts/nlu to learn more about NLU.
+   *
+   * ```js
+   * // ...
+   * nlu={{
+   *   model: 'https://somecdn.com/nlu.tflite',
+   *   metadata: 'https://somecdn.com/metadata.json',
+   *   vocab: 'https://somecdn.com/vocab.txt'
+   * }}
+   * ```
+   *
+   * You can also pass local files.
+   * Note: this requires a change to your metro.config.js. For more info, see
+   * "Including model files in your app bundle" in the README.md.
+   *
+   * ```js
+   * // ...
+   * nlu={{
+   *   model: require('./nlu.tflite'),
+   *   metadata: require('./metadata.json'),
+   *   vocab: require('./vocab.txt')
+   * }}
+   * ```
    */
-  nluModelUrls: {
-    nlu: string
-    vocab: string
-    metadata: string
-  }
+  nlu: SpokestackConfig['nlu']
   /** Width (and height) of the mic button */
   buttonWidth?: number
   /** How long to wait to close the tray after speaking (ms) */
@@ -151,7 +174,7 @@ interface Props {
    */
   onClose?: () => void
   /** Called whenever there's an error from Spokestack */
-  onError?: (e: Spokestack.ListenerEvent) => void
+  onError?: (e: SpokestackErrorEvent) => void
   /** Called whenever the tray has opened */
   onOpen?: () => void
   /**
@@ -168,6 +191,10 @@ interface Props {
    * react-native-spokestack.
    * These are available from react-native-spokestack
    * starting in version 4.0.0.
+   *
+   * If Wakeword config files are specified, the default will be
+   * `TFLITE_WAKEWORD_NATIVE_ASR`.
+   * Otherwise, the default is `PTT_NATIVE_ASR`.
    *
    * ```js
    * import SpokestackTray from 'react-native-spokestack-tray'
@@ -200,7 +227,7 @@ interface Props {
   /**
    * Pass options directly to the Spokestack.initialize()
    * function from react-native-spokestack.
-   * See https://www.spokestack.io/docs/React%20Native/getting-started#configuring-spokestack
+   * See https://github.com/spokestack/react-native-spokestack
    * for available options.
    */
   spokestackConfig?: Partial<SpokestackConfig>
@@ -213,18 +240,39 @@ interface Props {
   /** A key for a voice in Spokestack ASR, passed to Spokestack.synthesize */
   voice?: string
   /**
-   * The URLs of your wakeword model files.
-   * These models will be automatically downloaded
-   * the first time the app opens, and then saved.
-   * If no URLs are provided, the tray will default to
-   * the "Spokestack" wakeword.
-   * See https://spokestack.io/docs/Concepts/wakeword-models
+   * The NLU Tensorflow-Lite models (.tflite) for wakeword.
+   *
+   * All 3 fields accepts 2 types of values.
+   * 1. A string representing a remote URL from which to download and cache the file (presumably from a CDN).
+   * 2. A source object retrieved by a `require` or `import` (e.g. `model: require('./nlu.tflite')`)
+   *
+   * See https://spokestack.io/docs/concepts/wakeword-models to learn more about Wakeword
+   *
+   * Spokestack offers sample wakeword model files ("Spokestack"):
+   *
+   * ```js
+   * // ...
+   * wakeword={{
+   *   filter: 'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/filter.tflite',
+   *   detect: 'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/detect.tflite',
+   *   encode: 'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/encode.tflite'
+   * }}
+   * ```
+   *
+   * You can also download these models ahead of time and include them from local files.
+   * Note: this requires a change to your metro.config.js. For more info, see
+   * "Including model files in your app bundle" in the README.md.
+   *
+   * ```js
+   * // ...
+   * wakeword={{
+   *   filter: require('./filter.tflite'),
+   *   detect: require('./detect.tflite'),
+   *   encode: require('./encode.tflite')
+   * }}
+   * ```
    */
-  wakewordModelUrls?: {
-    filter: string
-    detect: string
-    encode: string
-  }
+  wakeword?: SpokestackConfig['wakeword']
 }
 
 interface State {
@@ -296,6 +344,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     buttonWidth: 60,
     closeDelay: 0,
     duration: 500,
+    editTranscript: (transcript) => transcript,
     easing: Easing.bezier(0.77, 0.41, 0.2, 0.84),
     gradientColors: ['#61fae9', '#2F5BEA'],
     greet: false,
@@ -329,38 +378,41 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   }
 
   async componentDidMount() {
+    console.log('componentDidMount')
     const {
       clientId,
       clientSecret,
       debug,
-      nluModelUrls,
+      nlu,
       profile,
       refreshModels,
       spokestackConfig = {},
-      wakewordModelUrls
+      wakeword
     } = this.props
-    this.initState()
+    await this.initState()
     this.addListeners()
 
-    const initialized = await Spokestack.initialize({
+    await Spokestack.initialize(
       clientId,
       clientSecret,
-      debug,
-      editTranscript: this.props.editTranscript,
-      nluModelUrls,
-      profile,
-      refreshModels,
-      wakewordModelUrls,
-      spokestackConfig
-    })
-    if (initialized) {
-      Spokestack.start().then(this.showHandle)
+      merge(spokestackConfig, {
+        traceLevel: debug ? TraceLevel.DEBUG : TraceLevel.NONE,
+        refreshModels,
+        pipeline: { profile },
+        nlu,
+        wakeword
+      })
+    ).catch(this.handleError)
+    if (await checkSpeech()) {
+      await Spokestack.start()
     }
+    this.showHandle()
   }
 
-  componentWillUnmount() {
+  async componentWillUnmount() {
+    console.log('componentWillUnmount')
     this.removeListeners()
-    Spokestack.stop()
+    await Spokestack.stop()
   }
 
   private async initState() {
@@ -369,40 +421,23 @@ export default class SpokestackTray extends PureComponent<Props, State> {
 
   private addListeners() {
     AppState.addEventListener('change', this.appStateChange)
-    Spokestack.addListener(
-      Spokestack.ListenerType.CLASSIFICATION,
-      this.handleIntent
+    Spokestack.addEventListener('recognize', this.onRecognize)
+    Spokestack.addEventListener('activate', this.onActivate)
+    Spokestack.addEventListener('deactivate', this.onDeactivate)
+    Spokestack.addEventListener('start', () =>
+      console.log('Spokestack started')
     )
-    Spokestack.addListener(Spokestack.ListenerType.RECOGNIZE, this.userSaid)
-    Spokestack.addListener(
-      Spokestack.ListenerType.ACTIVATE,
-      this.listeningStarted
+    Spokestack.addEventListener('stop', () => console.log('Spokestack stopped'))
+    Spokestack.addEventListener('trace', ({ message }: SpokestackTraceEvent) =>
+      console.log(message)
     )
-    Spokestack.addListener(
-      Spokestack.ListenerType.DEACTIVATE,
-      this.listeningStopped
-    )
-    Spokestack.addListener(Spokestack.ListenerType.TIMEOUT, this.close)
-    Spokestack.addListener(Spokestack.ListenerType.ERROR, this.handleError)
+    Spokestack.addEventListener('timeout', this.close)
+    Spokestack.addEventListener('error', this.handleError)
   }
 
   private removeListeners() {
     AppState.removeEventListener('change', this.appStateChange)
-    Spokestack.removeListener(
-      Spokestack.ListenerType.CLASSIFICATION,
-      this.handleIntent
-    )
-    Spokestack.removeListener(Spokestack.ListenerType.RECOGNIZE, this.userSaid)
-    Spokestack.removeListener(
-      Spokestack.ListenerType.ACTIVATE,
-      this.listeningStarted
-    )
-    Spokestack.removeListener(
-      Spokestack.ListenerType.DEACTIVATE,
-      this.listeningStopped
-    )
-    Spokestack.removeListener(Spokestack.ListenerType.TIMEOUT, this.close)
-    Spokestack.removeListener(Spokestack.ListenerType.ERROR, this.handleError)
+    Spokestack.removeAllListeners()
   }
 
   private appStateChange = (nextAppState: AppStateStatus) => {
@@ -421,7 +456,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     }
   }
 
-  private handleIntent = async ({ result }: SpokestackNLUEvent) => {
+  private async handleIntent(result: SpokestackNLUResult) {
     const {
       closeDelay,
       exitNodes,
@@ -438,7 +473,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       if (silent || (isGreeting && !sayGreeting)) {
         this.addBubble({ text: response.prompt, isLeft: true })
         if (shouldListen) {
-          setTimeout(Spokestack.listen, 200)
+          setTimeout(listen, 200)
         } else {
           setTimeout(this.close, closeDelay)
         }
@@ -450,19 +485,29 @@ export default class SpokestackTray extends PureComponent<Props, State> {
         this.say(response.prompt)
       }
     } else if (onError) {
-      onError({
-        type: Spokestack.ListenerType.ERROR,
-        error: 'No prompt returned in the response'
-      })
+      onError({ error: 'No prompt returned in the response' })
     }
   }
 
-  private userSaid = ({ transcript }: SpokestackRecognizeEvent) => {
+  private onRecognize = async ({ transcript }: SpokestackRecognizeEvent) => {
+    const { editTranscript, onError } = this.props
+    console.log('[Spokestack onRecognize]:', transcript)
     this.utterance = transcript
     this.addBubble({ text: transcript, isLeft: false })
+    const edited = editTranscript(transcript)
+    console.log('Transcript after editing: ', edited)
+    // Only call listeners if there's a transcript
+    if (edited.length > 0) {
+      const result = await Spokestack.classify(edited).catch((error) => {
+        onError({ error: error.message })
+      })
+      if (result) {
+        this.handleIntent(result)
+      }
+    }
   }
 
-  private listeningStarted = () => {
+  private onActivate = () => {
     const { haptic } = this.props
     this.setState({ listening: true, loading: false }, this.open)
     if (haptic) {
@@ -470,11 +515,11 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     }
   }
 
-  private listeningStopped = () => {
+  private onDeactivate = () => {
     this.setState({ listening: false })
   }
 
-  private handleError = (error: Spokestack.ListenerEvent) => {
+  private handleError = (error: SpokestackErrorEvent) => {
     this.setState({ listening: false })
     this.addBubble({
       text: errorMessage,
@@ -498,10 +543,10 @@ export default class SpokestackTray extends PureComponent<Props, State> {
 
   private onEnd = () => {
     console.log('onEnd listenWhenDone', this.listenWhenDone)
-    this.setState({ playerSource: null }, () => {
+    this.setState({ playerSource: null }, async () => {
       if (this.listenWhenDone) {
         this.listenWhenDone = false
-        setTimeout(Spokestack.listen, 200)
+        setTimeout(listen, 200)
       } else {
         setTimeout(this.close, this.props.closeDelay)
       }
@@ -537,11 +582,9 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       return
     }
     if (greet) {
-      this.handleIntent({
-        result: { intent: 'greet', confidence: 100, slots: [] }
-      })
+      this.handleIntent({ intent: 'greet', confidence: 100, slots: [] })
     } else {
-      Spokestack.listen()
+      listen()
     }
   }
 
@@ -594,7 +637,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
           onOpen()
         }
       } else {
-        Spokestack.stopListening().then(Spokestack.start)
+        stopListening().then(Spokestack.start)
         if (onClose) {
           onClose()
         }
@@ -637,12 +680,8 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       await Spokestack.stop()
     }
     this.setState({ loading: true }, () => {
-      Spokestack.synthesize({
-        input,
-        format,
-        voice
-      })
-        .then(({ url }) => {
+      Spokestack.synthesize(input, format, voice)
+        .then((url) => {
           if (url) {
             this.setState({ playerSource: url })
           } else {
