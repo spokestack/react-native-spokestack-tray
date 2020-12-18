@@ -523,7 +523,6 @@ export default class SpokestackTray extends PureComponent<Props, State> {
 
   private showHandle = () => {
     const { buttonWidth, easing, orientation } = this.props
-    console.log('Showing handle?')
     Animated.timing(this.panX, {
       duration: 200,
       easing,
