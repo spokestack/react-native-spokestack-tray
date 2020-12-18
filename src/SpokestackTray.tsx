@@ -26,7 +26,6 @@ import Spokestack, {
   SpokestackErrorEvent,
   SpokestackNLUResult,
   SpokestackRecognizeEvent,
-  SpokestackTraceEvent,
   TTSFormat,
   TraceLevel
 } from 'react-native-spokestack'
@@ -378,7 +377,6 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   }
 
   async componentDidMount() {
-    console.log('componentDidMount')
     const {
       clientId,
       clientSecret,
@@ -410,7 +408,6 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   }
 
   async componentWillUnmount() {
-    console.log('componentWillUnmount')
     this.removeListeners()
     await Spokestack.stop()
   }
@@ -424,13 +421,6 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     Spokestack.addEventListener('recognize', this.onRecognize)
     Spokestack.addEventListener('activate', this.onActivate)
     Spokestack.addEventListener('deactivate', this.onDeactivate)
-    Spokestack.addEventListener('start', () =>
-      console.log('Spokestack started')
-    )
-    Spokestack.addEventListener('stop', () => console.log('Spokestack stopped'))
-    Spokestack.addEventListener('trace', ({ message }: SpokestackTraceEvent) =>
-      console.log(message)
-    )
     Spokestack.addEventListener('timeout', this.close)
     Spokestack.addEventListener('error', this.handleError)
   }
@@ -533,6 +523,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
 
   private showHandle = () => {
     const { buttonWidth, easing, orientation } = this.props
+    console.log('Showing handle?')
     Animated.timing(this.panX, {
       duration: 200,
       easing,

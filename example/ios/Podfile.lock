@@ -194,7 +194,7 @@ PODS:
   - React-jsinspector (0.63.4)
   - react-native-netinfo (5.9.9):
     - React-Core
-  - react-native-spokestack (5.0.0-beta.1):
+  - react-native-spokestack (5.0.0-beta.4):
     - React
     - Spokestack-iOS (= 14.0.1)
   - react-native-video (5.1.0-alpha8):
@@ -421,7 +421,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 93bd528844ad21dc07aab1c67cb10abae6df6949
   React-jsinspector: 58aef7155bc9a9683f5b60b35eccea8722a4f53a
   react-native-netinfo: 77d133105df525d4a11f10fcaa8d0b8883ea6429
-  react-native-spokestack: 9e3d454c8c36faf3fa5a2e87e7befd74086699fd
+  react-native-spokestack: 89c81ec1064cae44348f6b11148f73c6258c2d22
   react-native-video: 8d97379f3c2322a569f1e27542ad1a646cad9444
   React-RCTActionSheet: 89a0ca9f4a06c1f93c26067af074ccdce0f40336
   React-RCTAnimation: 1bde3ecc0c104c55df246eda516e0deb03c4e49b
