@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@react-native-community/async-storage": "^1.12.1",
-    "@react-native-community/netinfo": "^5.9.9",
     "babel-plugin-transform-inline-environment-variables": "^0.4.3",
     "react": "^17.0.1",
     "react-native": "0.63.4",

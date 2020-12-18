@@ -11,7 +11,7 @@ Install this library with the peer dependencies
 A one-liner to install all dependencies
 
 ```sh
-npm install react-native-spokestack-tray react-native-spokestack @react-native-community/async-storage @react-native-community/netinfo react-native-video react-native-haptic-feedback react-native-linear-gradient react-native-permissions
+npm install react-native-spokestack-tray react-native-spokestack @react-native-community/async-storage react-native-video react-native-haptic-feedback react-native-linear-gradient react-native-permissions
 ```
 
 ### Each dependency by its usage.
@@ -22,13 +22,10 @@ $ npm install react-native-spokestack-tray react-native-spokestack
 # Used for storing a simple boolean to turn on/off sound
 $ npm install @react-native-community/async-storage
 
-# Used to check the network status before downloading model files
-$ npm install @react-native-community/netinfo
-
 # Used to play TTS audio prompts.
 # Despite its name, we think this is one of the best
 # plugins (if not the best) for playing audio.
-# In iOS, Audio and Video are intertwined.
+# In iOS, Audio and Video are intertwined anyway.
 $ npm install react-native-video
 
 # Used to show an animating gradient when Spokestack listens

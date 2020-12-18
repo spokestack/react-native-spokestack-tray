@@ -53,7 +53,6 @@
     "@react-native-community/async-storage": "^1.12.1",
     "@react-native-community/bob": "^0.16.2",
     "@react-native-community/eslint-config": "^2.0.0",
-    "@react-native-community/netinfo": "^5.9.9",
     "@release-it/conventional-changelog": "^2.0.0",
     "@types/color": "^3.0.1",
     "@types/jest": "^26.0.19",
