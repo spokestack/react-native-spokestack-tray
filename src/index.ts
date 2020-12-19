@@ -38,7 +38,7 @@ export const isStarted = Spokestack.isStarted
  * ```js
  * useEffect(() => {
  *   const listener = addEventListener('recognize', onRecognize)
- *   // Unsubsribe by calling remove when components are unmounted
+ *   // Unsubscribe by calling remove when components are unmounted
  *   return () => {
  *     listener.remove()
  *   }

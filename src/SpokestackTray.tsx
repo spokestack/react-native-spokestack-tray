@@ -94,9 +94,9 @@ interface Props {
     utterance?: string
   ) => IntentResult
   /**
-   * The NLU Tensorflow-Lite model (.tflite), JSON metadata, and NLU vocabulary (.txt)
+   * The NLU Tensorflow Lite model (.tflite), JSON metadata, and NLU vocabulary (.txt)
    *
-   * All 3 fields accepts 2 types of values.
+   * All 3 fields accept 2 types of values.
    * 1. A string representing a remote URL from which to download and cache the file (presumably from a CDN).
    * 2. A source object retrieved by a `require` or `import` (e.g. `model: require('./nlu.tflite')`)
    *
@@ -239,9 +239,9 @@ interface Props {
   /** A key for a voice in Spokestack ASR, passed to Spokestack.synthesize */
   voice?: string
   /**
-   * The NLU Tensorflow-Lite models (.tflite) for wakeword.
+   * The NLU Tensorflow Lite models (.tflite) for wakeword.
    *
-   * All 3 fields accepts 2 types of values.
+   * All 3 fields accept 2 types of values.
    * 1. A string representing a remote URL from which to download and cache the file (presumably from a CDN).
    * 2. A source object retrieved by a `require` or `import` (e.g. `model: require('./nlu.tflite')`)
    *
