@@ -48,10 +48,17 @@ export default function handleIntent(
     case 'RecipeIntent':
       lastNode = {
         node: 'recipe',
-        prompt: `If I were a real app, I would show a screen now on how to make a ${slots.Item.value}. Want to continue?`
+        prompt: `If I were a real app, I would show a screen now on how to make ${
+          slots.length ? `a ${slots[0].value}` : 'something'
+        }. Want to continue?`
       }
       return lastNode
     case 'AMAZON.HelpIntent':
+      lastNode = {
+        node: 'help',
+        prompt: 'Try saying, "How do I make a castle?". To exit, say "exit".'
+      }
+      return lastNode
     default:
       lastNode = greeting
       return lastNode

@@ -77,12 +77,9 @@ export function requestPermission(
  */
 export async function checkSpeech() {
   if (Platform.OS === 'ios') {
-    const mic = await checkPermission(PERMISSIONS.IOS.MICROPHONE)
     const speech = await checkPermission(PERMISSIONS.IOS.SPEECH_RECOGNITION)
-    console.log(
-      `Microphone permission is currently ${mic} and Speech Recognition is ${speech}.`
-    )
-    return mic && speech
+    console.log(`Speech Recognition permission is currently ${speech}.`)
+    return speech
   }
   const mic = await checkPermission(PERMISSIONS.ANDROID.RECORD_AUDIO)
   console.log(`Microphone permission is currently ${mic}.`)
@@ -108,12 +105,9 @@ export async function checkSpeech() {
  */
 export async function requestSpeech() {
   if (Platform.OS === 'ios') {
-    return (
-      (await requestPermission(
-        PERMISSIONS.IOS.MICROPHONE,
-        rationales.microphone
-      )) &&
-      requestPermission(PERMISSIONS.IOS.SPEECH_RECOGNITION, rationales.speech)
+    return requestPermission(
+      PERMISSIONS.IOS.SPEECH_RECOGNITION,
+      rationales.speech
     )
   }
   return requestPermission(

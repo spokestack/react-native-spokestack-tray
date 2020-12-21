@@ -41,13 +41,6 @@ function getInterfaceContent(filename) {
     .replace(/\n### /g, '\n### ')
 }
 
-function getEnumContent(filename) {
-  return redoLinks(read(`../docs/enums/${filename}`))
-    .replace(/[\w\W]+##\s*Enumeration members/, '')
-    .replace(/___/g, '')
-    .replace(/\n### /g, '\n### ')
-}
-
 /**
  * @param {string} filename
  * @param {Array<string>} functions List of functions to extract from docs
@@ -68,7 +61,6 @@ function getModuleFunctions(filename, functions) {
 
 const rprops = /(?:`Optional` )?\*\*(\w+)\*\*\s*: [^\n]+/g
 const rdefaultProps = /`(\w+)` \|[^|]+\|\s*([^|]+) |/g
-const renum = /\*\*(\w+)\*\*:\s*=\s*([^\n]+)/g
 
 // Start with the README
 const header = '\n---\n\n# Documentation'
@@ -106,29 +98,6 @@ getInterfaceContent('_src_spokestacktray_.intentresult.md').replace(
   rprops,
   function (all) {
     data += `\n${all}\n`
-  }
-)
-
-// Add SpokestackListenerEvent definition
-data += '\n---\n\n#### `SpokestackListenerEvent`\n'
-data += 'SpokestackListenerEvent is passed to some callbacks. '
-data +=
-  'Usually, only `type` and one other property is defined, depending on the context.\n\n'
-getInterfaceContent('_src_spokestack_.listenerevent.md').replace(
-  rprops,
-  function (all) {
-    data += `\n${all}\n`
-  }
-)
-
-// Add SpokestackListenerEvent enum
-data += '\n---\n\n#### `SpokestackListenerType` enum\n'
-data += '`SpokestackListenerType` is used in `SpokestackListenerEvent`\n'
-getEnumContent('_src_spokestack_.listenertype.md').replace(
-  renum,
-  function (all, key, value) {
-    data += `\n**${key}** = ${value}\n`
-    return all
   }
 )
 
@@ -176,16 +145,19 @@ data += getClassMethods('_src_spokestacktray_.spokestacktray.md', [
 data += '\n---\n\n## Spokestack Functions\n'
 data +=
   '\nThese functions are available as exports from react-native-spokestack-tray\n\n'
-data += getModuleFunctions('_src_spokestack_.md', [
-  'listen',
-  'stopListening',
+data += getModuleFunctions('_src_spokestack_.md', ['listen', 'stopListening'])
+data += getModuleFunctions('_src_index_.md', [
   'isListening',
-  'isStarted',
   'isInitialized',
-  'addListener',
-  'removeListener',
-  'addListenerOnce'
+  'isStarted',
+  'addEventListener',
+  'removeEventListener',
+  'removeAllListeners'
 ])
+
+data += '\n\n---\n\n'
+data += read('../node_modules/react-native-spokestack/EVENTS.md')
+data += '\n\n---\n\n'
 
 // Add permissions functions
 

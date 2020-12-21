@@ -1,11 +1,12 @@
 import SpokestackTray, {
-  addListener,
+  addEventListener,
   checkSpeech,
   isInitialized,
   isListening,
   isStarted,
   listen,
-  removeListener,
+  removeAllListeners,
+  removeEventListener,
   requestSpeech,
   stopListening
 } from 'react-native-spokestack-tray'
@@ -18,8 +19,9 @@ describe('SpokestackTray', () => {
     expect(isListening).toBeDefined()
     expect(isStarted).toBeDefined()
     expect(isInitialized).toBeDefined()
-    expect(addListener).toBeDefined()
-    expect(removeListener).toBeDefined()
+    expect(addEventListener).toBeDefined()
+    expect(removeEventListener).toBeDefined()
+    expect(removeAllListeners).toBeDefined()
     expect(checkSpeech).toBeDefined()
     expect(requestSpeech).toBeDefined()
   })
