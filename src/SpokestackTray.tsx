@@ -482,10 +482,10 @@ export default class SpokestackTray extends PureComponent<Props, State> {
   private onRecognize = async ({ transcript }: SpokestackRecognizeEvent) => {
     const { editTranscript, onError } = this.props
     console.log('[Spokestack onRecognize]:', transcript)
-    this.utterance = transcript
-    this.addBubble({ text: transcript, isLeft: false })
     const edited = editTranscript(transcript)
     console.log('Transcript after editing: ', edited)
+    this.utterance = edited
+    this.addBubble({ text: edited, isLeft: false })
     // Only call listeners if there's a transcript
     if (edited.length > 0) {
       const result = await Spokestack.classify(edited).catch((error) => {
