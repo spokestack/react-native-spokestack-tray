@@ -41,6 +41,8 @@ $ npm install react-native-haptic-feedback
 
 Then follow the instructions for each platform to link react-native-spokestack to your project:
 
+## iOS installation
+
 <details>
   <summary>iOS details</summary>
 
