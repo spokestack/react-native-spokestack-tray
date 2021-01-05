@@ -90,7 +90,7 @@ interface Props {
    */
   handleIntent: (
     intent: string,
-    slots?: any,
+    slots?: SpokestackNLUResult['slots'],
     utterance?: string
   ) => IntentResult
   /**
@@ -572,7 +572,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
       return
     }
     if (greet) {
-      this.handleIntent({ intent: 'greet', confidence: 100, slots: [] })
+      this.handleIntent({ intent: 'greet', confidence: 100, slots: {} })
     } else {
       listen()
     }

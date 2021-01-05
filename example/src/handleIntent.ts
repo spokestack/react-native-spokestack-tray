@@ -1,10 +1,11 @@
+import type { IntentResult } from 'react-native-spokestack-tray'
 /**
  * This file is an example of how you might respond to the NLU.
  * See minecraft_metadata.json for a copy of the NLU metadata
  * downloaded to the app. This has a list of all possible intents
  * to which the app should respond.
  */
-import type { IntentResult } from 'react-native-spokestack-tray'
+import type { SpokestackNLUResult } from 'react-native-spokestack'
 
 const greeting = {
   node: 'greeting',
@@ -17,7 +18,7 @@ let lastNode: IntentResult = greeting
 
 export default function handleIntent(
   intent: string,
-  slots?: any,
+  slots?: SpokestackNLUResult['slots'],
   utterance?: string
 ) {
   console.log(`Intent from NLU is ${intent} with slots`, slots)
@@ -49,7 +50,7 @@ export default function handleIntent(
       lastNode = {
         node: 'recipe',
         prompt: `If I were a real app, I would show a screen now on how to make ${
-          slots.length ? `a ${slots[0].value}` : 'something'
+          slots.Item ? `a ${slots.Item.value}` : 'something'
         }. Want to continue?`
       }
       return lastNode
