@@ -89,7 +89,6 @@ data += trayProps
       : all
   })
   .replace(/IntentResult/g, '[IntentResult](#IntentResult)')
-  .replace(/ListenerEvent/g, '[ListenerEvent](#ListenerEvent)')
 
 // Add IntentResult definition
 data += '\n---\n\n#### `IntentResult`\n'
