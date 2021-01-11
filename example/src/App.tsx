@@ -33,20 +33,14 @@ export default function App() {
         }}
         sayGreeting={sayGreeting}
         nlu={{
-          model:
-            'https://d3dmqd7cy685il.cloudfront.net/nlu/production/shared/XtASJqxkO6UwefOzia-he2gnIMcBnR2UCF-VyaIy-OI/nlu.tflite',
-          vocab:
-            'https://d3dmqd7cy685il.cloudfront.net/nlu/production/shared/XtASJqxkO6UwefOzia-he2gnIMcBnR2UCF-VyaIy-OI/vocab.txt',
-          metadata:
-            'https://d3dmqd7cy685il.cloudfront.net/nlu/production/shared/XtASJqxkO6UwefOzia-he2gnIMcBnR2UCF-VyaIy-OI/metadata.json'
+          model: 'https://s.spokestack.io/u/7fYxV/nlu.tflite',
+          metadata: 'https://s.spokestack.io/u/7fYxV/metadata.json',
+          vocab: 'https://s.spokestack.io/u/7fYxV/vocab.txt'
         }}
         wakeword={{
-          filter:
-            'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/filter.tflite',
-          detect:
-            'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/detect.tflite',
-          encode:
-            'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/encode.tflite'
+          filter: 'https://s.spokestack.io/u/hgmYb/filter.tflite',
+          detect: 'https://s.spokestack.io/u/hgmYb/detect.tflite',
+          encode: 'https://s.spokestack.io/u/hgmYb/encode.tflite'
         }}
       />
     </View>

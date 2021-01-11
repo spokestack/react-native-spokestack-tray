@@ -182,44 +182,6 @@ Add the necessary permissions to your `AndroidManifest.xml`. The first permissio
 
 </details>
 
-## Including model files in your app bundle
-
-To include model files locally in your app (rather than downloading them from a CDN), you also need to add the necessary extensions so
-the files can be included by Babel. To do this, edit your [`metro.config.js`](https://facebook.github.io/metro/docs/configuration/).
-
-```js
-const defaults = require('metro-config/src/defaults/defaults')
-
-module.exports = {
-  resolver: {
-    // json is already in the list
-    assetExts: defaults.assetExts.concat(['tflite', 'txt'])
-  }
-}
-```
-
-Then include model files using source objects:
-
-```js
-<SpokestackTray
-  clientId={process.env.SPOKESTACK_CLIENT_ID}
-  clientSecret={process.env.SPOKESTACK_CLIENT_SECRET}
-  handleIntent={handleIntent}
-  wakeword={{
-    filter: require('./filter.tflite'),
-    detect: require('./detect.tflite'),
-    encode: require('./encode.tflite')
-  }}
-  nlu={{
-    model: require('./nlu.tflite'),
-    metadata: require('./metadata.json'),
-    vocab: require('./vocab.txt')
-  }}
-/>
-```
-
-This is not required. Pass remote URLs to the same config options and the files will be downloaded and cached when first calling `initialize`.
-
 ## Usage
 
 ```js
@@ -256,11 +218,8 @@ export default function ConversationHandler({ navigation }) {
       }}
       // The NLU models are downloaded and then cached
       // when the app is first installed.
-      // These files can be made manually or
-      // exported from existing Alexa, Dialogflow, or
-      // Jovo models.
       // See https://spokestack.io/docs/concepts/nlu
-      // for more info.
+      // for more info on NLU.
       nlu={{
         nlu: 'https://somecdn/nlu.tflite',
         vocab: 'https://somecdn/vocab.txt',
@@ -270,6 +229,49 @@ export default function ConversationHandler({ navigation }) {
   )
 }
 ```
+
+## Including model files in your app bundle
+
+To include model files locally in your app (rather than downloading them from a CDN), you also need to add the necessary extensions so
+the files can be included by Babel. To do this, edit your [`metro.config.js`](https://facebook.github.io/metro/docs/configuration/).
+
+```js
+const defaults = require('metro-config/src/defaults/defaults')
+
+module.exports = {
+  resolver: {
+    // json is already in the list
+    assetExts: defaults.assetExts.concat(['tflite', 'txt', 'sjson'])
+  }
+}
+```
+
+Then include model files using source objects:
+
+```js
+<SpokestackTray
+  clientId={process.env.SPOKESTACK_CLIENT_ID}
+  clientSecret={process.env.SPOKESTACK_CLIENT_SECRET}
+  handleIntent={handleIntent}
+  wakeword={{
+    filter: require('./filter.tflite'),
+    detect: require('./detect.tflite'),
+    encode: require('./encode.tflite')
+  }}
+  nlu={{
+    model: require('./nlu.tflite'),
+    vocab: require('./vocab.txt'),
+    // Be sure not to use "json" here.
+    // We use a different extension (.sjson) so that the file is not
+    // immediately parsed as json and instead
+    // passes a require source object to Spokestack.
+    // The special extension is only necessary for local files.
+    metadata: require('./metadata.sjson')
+  }}
+/>
+```
+
+This is not required. Pass remote URLs to the same config options and the files will be downloaded and cached when first calling `initialize`.
 
 ## Contributing
 
