@@ -1,4 +1,4 @@
-# react-native-spokestack-tray
+<a href="https://www.spokestack.io/blog/integrating-spokestack-in-react-native" title="Integrating Spokestack in React Native">![React Native Spokestack Tray](./example/react-native-spokestsack-tray.png)</a>
 
 A React Native component for adding Spokestack to any React Native app.
 
