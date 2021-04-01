@@ -236,7 +236,7 @@ interface Props {
   style?: Animated.WithAnimatedValue<StyleProp<ViewStyle>>
   /** The format for the text passed to Spokestack.synthesize */
   ttsFormat?: TTSFormat
-  /** A key for a voice in Spokestack ASR, passed to Spokestack.synthesize */
+  /** A key for a voice in Spokestack TTS, passed to Spokestack.synthesize */
   voice?: string
   /**
    * The NLU Tensorflow Lite models (.tflite) for wakeword.
