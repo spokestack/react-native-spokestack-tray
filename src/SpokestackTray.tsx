@@ -64,7 +64,7 @@ export interface IntentResult {
   data?: any
 }
 
-interface Props {
+export interface SpokestackTrayProps {
   /**
    * Your Spokestack tokens generated in your Spokestack account
    * at https://spokestack.io/account.
@@ -219,9 +219,9 @@ interface Props {
    * even if sound is on.
    */
   sayGreeting?: boolean
-  /** Replace the sound on image by passing an <Image /> */
+  /** Replace the sound on image by passing a React Image component */
   soundOnImage?: React.ReactNode
-  /** Replace the sound off image by passing an <Image /> */
+  /** Replace the sound off image by passing a React Image component */
   soundOffImage?: React.ReactNode
   /**
    * Pass options directly to the Spokestack.initialize()
@@ -287,7 +287,10 @@ interface State {
   startHeight: number
 }
 
-export default class SpokestackTray extends PureComponent<Props, State> {
+export default class SpokestackTray extends PureComponent<
+  SpokestackTrayProps,
+  State
+> {
   private wentToBackground: boolean
   private windowWidth = Dimensions.get('window').width
   private windowHeight: number
@@ -339,7 +342,7 @@ export default class SpokestackTray extends PureComponent<Props, State> {
     }
   })
 
-  static defaultProps: Partial<Props> = {
+  static defaultProps: Partial<SpokestackTrayProps> = {
     buttonWidth: 60,
     closeDelay: 0,
     duration: 500,

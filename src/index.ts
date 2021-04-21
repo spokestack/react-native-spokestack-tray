@@ -1,4 +1,7 @@
-import SpokestackTray, { IntentResult } from './SpokestackTray'
+import SpokestackTray, {
+  IntentResult,
+  SpokestackTrayProps
+} from './SpokestackTray'
 
 import Spokestack from 'react-native-spokestack'
 
@@ -64,5 +67,6 @@ export const removeEventListener = Spokestack.removeEventListener
  * ```
  */
 export const removeAllListeners = Spokestack.removeAllListeners
-export { IntentResult }
+export { IntentResult, SpokestackTrayProps }
+export { Bubble } from './components/SpeechBubbles'
 export default SpokestackTray

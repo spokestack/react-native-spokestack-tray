@@ -8,59 +8,68 @@ function write(filename, data) {
   return fs.writeFileSync(`${__dirname}/${filename}`, data)
 }
 
-function redoLinks(data) {
-  return (
-    data
-      // Remove links that aren't links to source
-      .replace(/\[([^:]+)\]\(.*?\)/g, '$1')
+// Remove links that aren't links to source
+function removeLinks(data) {
+  return data.replace(/\[([^:]+)\]\(.*?\)/g, '$1')
+}
+/**
+ * @param {Array<string>} functions List of functions to extract from docs
+ */
+function getModuleFunctions(functions) {
+  const available = removeLinks(read('../docs/README.md'))
+    // Remove everything up to functions
+    .replace(/[^]+#{2}\s*Functions/, '')
+    .split(/___/)
+  return functions
+    .map((fn) => {
+      const rfn = new RegExp(`###\\s*${fn}[^#]+?`)
+      const doc = available.find((existing) => rfn.test(existing))
+      return doc || ''
+    })
+    .join('\n\n')
+}
+
+function getInterfaceContent(filename, hideHeader) {
+  return removeLinks(
+    read(`../docs/interfaces/${filename}`)
+      .replace(
+        /# Interface:\s*(.+)[^]+##\s*Properties/,
+        hideHeader ? '' : '#### $1'
+      )
+      .replace(/___/g, '')
+      // Remove superfluous type declarations
+      .replace(/#### Type declaration:[^]+?▸ .+/g, '')
+      // Remove double "Defined in"
+      .replace(/(Defined in: .+)\n\nDefined in: .+/g, '$1')
   )
 }
 
-/**
- * @param {string} filename
- * @param {Array<string>} methods List of methods to extract from docs
- */
 function getClassMethods(filename, methods) {
-  const fileData = redoLinks(read(`../docs/classes/${filename}`))
-    // Remove everything up to methods
-    .replace(/[\w\W]+#{2}\s*Methods/, '')
-    .replace(/___/g, '')
-  return methods
-    .map((method) => {
-      const rmethod = new RegExp(`#\\s*(${method}[\\w\\W]+?)##`)
-      const match = rmethod.exec(fileData)
-      return match ? `\n---\n### ${match[1]}` : ''
-    })
-    .join('\n\n')
-}
-
-function getInterfaceContent(filename) {
-  return redoLinks(read(`../docs/interfaces/${filename}`))
-    .replace(/[\w\W]+##\s*Properties/, '')
-    .replace(/___/g, '')
-    .replace(/\n### /g, '\n### ')
-}
-
-/**
- * @param {string} filename
- * @param {Array<string>} functions List of functions to extract from docs
- */
-function getModuleFunctions(filename, functions) {
-  const fileData = redoLinks(read(`../docs/modules/${filename}`))
+  const available = removeLinks(read(`../docs/classes/${filename}`))
     // Remove everything up to functions
-    .replace(/[\w\W]+#{2}\s*Functions/, '')
-    .replace(/___/g, '')
-  return functions
+    .replace(/[^]+#{2}\s*Functions/, '')
+    .split(/___/)
+  return methods
     .map((fn) => {
-      const rfn = new RegExp(`#\\s*(${fn}[\\w\\W]+?)##`)
-      const match = rfn.exec(fileData)
-      return match ? `\n---\n### ${match[1]}` : ''
+      const rfn = new RegExp(`###\\s*${fn}[^#]+?`)
+      const doc = available.find((existing) => rfn.test(existing))
+      return doc || ''
     })
     .join('\n\n')
 }
+
+// function getEnumContent(filename) {
+//   return removeLinks(
+//     read(`../docs/enums/${filename}`)
+//       .replace(/# Enumeration:\s*(.+)/, '#### $1')
+//       .replace(/\[.+\]\([./a-z]+\)\..+/, '')
+//       .replace(/\n### .+/g, '')
+//       .replace(/## Table of contents[^]+## Enumeration members/, '')
+//       .replace(/___/g, '')
+//   )
+// }
 
 const rprops = /(?:`Optional` )?\*\*(\w+)\*\*\s*: [^\n]+/g
-const rdefaultProps = /`(\w+)` \|[^|]+\|\s*([^|]+) |/g
 
 // Start with the README
 const header = '\n---\n\n# Documentation'
@@ -68,18 +77,15 @@ let data =
   read('../README.md').replace(new RegExp(header + '[\\w\\W]+'), '') + header
 
 // Add Spokestack tray props
-const defaultOptions = redoLinks(
-  read('../docs/classes/_src_spokestacktray_.spokestacktray.md')
-)
-  // Remove unwanted text
-  .replace(/[\w\W]+\*\*defaultProps\*\*: object/, '')
-
+const source = read('../src/SpokestackTray.tsx')
+const defaultProps = /static defaultProps: Partial<SpokestackTrayProps> = ({[^]+?\n {2}})/.exec(
+  source
+)[1]
 const parsedDefaults = {}
-defaultOptions.replace(rdefaultProps, function (all, key, value) {
-  parsedDefaults[key] = value
-  return all
+defaultProps.replace(/(\w+): ([^]+?)(?:,\n|\n {2}})/g, (all, key, value) => {
+  parsedDefaults[key] = value.replace(/'/g, '"')
 })
-const trayProps = getInterfaceContent('_src_spokestacktray_.props.md')
+const trayProps = getInterfaceContent('spokestacktrayprops.md', true)
 data += '\n\n## `<SpokestackTray />` Component Props'
 data += trayProps
   // Add in default values to option descriptions
@@ -90,15 +96,7 @@ data += trayProps
   })
   .replace(/IntentResult/g, '[IntentResult](#IntentResult)')
 
-// Add IntentResult definition
-data += '\n---\n\n#### `IntentResult`\n'
-data += 'IntentResult is the expected return type of `handleIntent`.\n'
-getInterfaceContent('_src_spokestacktray_.intentresult.md').replace(
-  rprops,
-  function (all) {
-    data += `\n${all}\n`
-  }
-)
+data += getInterfaceContent('intentresult.md')
 
 // Add SpokestackTray methods
 data += '\n---\n\n## `<SpokestackTray />` Component Methods\n'
@@ -119,33 +117,18 @@ spokestackTray.current.say('Here is something for Spokestack to say')
 **Note**: In most cases, you should call \`listen\` instead of \`open\`.
 \n\n
 `
-data += getClassMethods('_src_spokestacktray_.spokestacktray.md', [
-  'open',
-  'close',
-  'say',
-  'addBubble'
-])
 
-// Add Bubble definition
-data += '\n#### `Bubble`\n'
-getInterfaceContent('_src_components_speechbubbles_.bubble.md').replace(
-  rprops,
-  function (all) {
-    data += `\n${all}\n`
-  }
-)
-
-data += getClassMethods('_src_spokestacktray_.spokestacktray.md', [
-  'toggleSilent',
-  'isSilent'
-])
+data += getClassMethods('default.md', ['open', 'close', 'say', 'addBubble'])
+data += getInterfaceContent('bubble.md')
+data += getClassMethods('default.md', ['toggleSilent', 'isSilent'])
 
 // Add default exported functions
 data += '\n---\n\n## Spokestack Functions\n'
 data +=
   '\nThese functions are available as exports from react-native-spokestack-tray\n\n'
-data += getModuleFunctions('_src_spokestack_.md', ['listen', 'stopListening'])
-data += getModuleFunctions('_src_index_.md', [
+data += getModuleFunctions([
+  'listen',
+  'stopListening',
   'isListening',
   'isInitialized',
   'isStarted',
@@ -164,10 +147,7 @@ data += '\n\n## Checking speech permissions\n'
 data +=
   '\nThese utility functions are used by Spokestack to check microphone permission on iOS and Android and speech recognition permission on iOS.\n'
 
-data += getModuleFunctions('_src_utils_permissions_.md', [
-  'checkSpeech',
-  'requestSpeech'
-])
+data += getModuleFunctions(['checkSpeech', 'requestSpeech'])
 
 // Add license info
 data += '\n---\n\n ## License\n\nMIT\n'
