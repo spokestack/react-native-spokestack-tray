@@ -46,26 +46,28 @@ Then follow the instructions for each platform to link react-native-spokestack t
 <details>
   <summary>iOS details</summary>
 
+### Set deployment target
+
+react-native-spokestack makes use of relatively new APIs only available in iOS 13+. Make sure to set your deployment target to iOS 13.
+
+First, open XCode and go to Project -> Info to set the iOS Deployment target to 13.0 or higher.
+
+Also, set deployment to 13.0 under Target -> General -> Deployment Info.
+
+### Remove invalid library search path
+
+When Flipper was introduced to React Native, some library search paths were set for Swift. There has been a longstanding issue with the default search paths in React Native projects because a search path was added for swift 5.0 which prevented any other React Native libraries from using APIs only available in Swift 5.2 or later. Spokestack-iOS, a dependency of react-native-spokestack makes use of these APIs and XCode will fail to build.
+
+Fortunately, the fix is fairly simple. Go to your target -> Build Settings and search for "Library Search Paths".
+
+Remove `"\"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)\""` from the list.
+
 ### Edit Podfile
 
 Before running `pod install`, make sure to make the following edits.
 
-react-native-spokestack makes use of relatively new APIs only available in iOS 13+. Make sure to set your deployment target to iOS 13 at the top of your Podfile:
-
-Also set your deployment target to 13.0 in your XCode project.
-
 ```ruby
 platform :ios, '13.0'
-```
-
-We use [react-native-permissions](https://github.com/react-native-community/react-native-permissions) to check and request the Microphone permission (iOS and Android) and the Speech Recognition permission (iOS only). This library separates each permission into its own pod to avoid inflating your app with code you don't use. Add the following pods to your Podfile:
-
-```ruby
-target 'SpokestackTrayExample' do
-  # ...
-  permissions_path = '../node_modules/react-native-permissions/ios'
-  pod 'Permission-Microphone', :path => "#{permissions_path}/Microphone.podspec"
-  pod 'Permission-SpeechRecognition', :path => "#{permissions_path}/SpeechRecognition.podspec"
 ```
 
 We also need to use `use_frameworks!` in our Podfile in order to support dependencies written in Swift.
@@ -80,12 +82,49 @@ For the time being, `use_frameworks!` does not work with Flipper, so we also nee
 
 ```ruby
   # X Remove or comment out these lines X
-  use_flipper!
-  post_install do |installer|
-    flipper_post_install(installer)
-  end
+  # use_flipper!
+  # post_install do |installer|
+  #   flipper_post_install(installer)
+  # end
   # XX
 ```
+
+#### react-native-permissions pods
+
+We use [react-native-permissions](https://github.com/react-native-community/react-native-permissions) to check and request the Microphone permission (iOS and Android) and the Speech Recognition permission (iOS only). This library separates each permission into its own pod to avoid inflating your app with code you don't use. Add the following pods to your Podfile:
+
+```ruby
+target 'SpokestackTrayExample' do
+  # ...
+  permissions_path = '../node_modules/react-native-permissions/ios'
+  pod 'Permission-Microphone', :path => "#{permissions_path}/Microphone.podspec"
+  pod 'Permission-SpeechRecognition', :path => "#{permissions_path}/SpeechRecognition.podspec"
+```
+
+#### Bug in React Native 0.64.0 (should be fixed in 0.64.1)
+
+React Native 0.64.0 broke any projects using `use_frameworks!` in their Podfiles.
+
+For more info on this bug, see https://github.com/facebook/react-native/issues/31149.
+
+To workaround this issue, add the following to your Podfile:
+
+```ruby
+# Moves 'Generate Specs' build_phase to be first for FBReactNativeSpec
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    if (target.name&.eql?('FBReactNativeSpec'))
+      target.build_phases.each do |build_phase|
+        if (build_phase.respond_to?(:name) && build_phase.name.eql?('[CP-User] Generate Specs'))
+          target.build_phases.move(build_phase, 0)
+        end
+      end
+    end
+  end
+end
+```
+
+#### pod install
 
 Remove your existing Podfile.lock and Pods folder to ensure no conflicts, then install the pods:
 

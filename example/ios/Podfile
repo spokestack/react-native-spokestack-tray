@@ -16,20 +16,41 @@ pre_install do |installer|
   end
 end
 
+# need to move 'Generate Specs' build_phase to be first for FBReactNativeSpec
+# See https://github.com/facebook/react-native/issues/31149
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    if (target.name&.eql?('FBReactNativeSpec'))
+      target.build_phases.each do |build_phase|
+        if (build_phase.respond_to?(:name) && build_phase.name.eql?('[CP-User] Generate Specs'))
+          target.build_phases.move(build_phase, 0)
+        end
+      end
+    end
+  end
+end
+
 target 'SpokestackTrayExample' do
   use_frameworks!
   config = use_native_modules!
 
-  use_react_native!(:path => config["reactNativePath"])
+  use_react_native!(
+    :path => config[:reactNativePath],
+    # to enable hermes on iOS, change `false` to `true` and then install pods
+    :hermes_enabled => false
+  )
 
   permissions_path = '../node_modules/react-native-permissions/ios'
   pod 'Permission-Microphone', :path => "#{permissions_path}/Microphone"
   pod 'Permission-SpeechRecognition', :path => "#{permissions_path}/SpeechRecognition"
 
+  # Enables Flipper.
+  #
   # Note that if you have use_frameworks! enabled, Flipper will not work and
-  # you should disable these next few lines.
-  # use_flipper!
+  # you should disable the next line.
+  # use_flipper!()
+
   # post_install do |installer|
-  #   flipper_post_install(installer)
+  #   react_native_post_install(installer)
   # end
 end

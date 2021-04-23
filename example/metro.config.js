@@ -1,5 +1,6 @@
 const path = require('path')
-const blacklist = require('metro-config/src/defaults/blacklist')
+const exclusionList = require('metro-config/src/defaults/exclusionList')
+const defaults = require('metro-config/src/defaults/defaults')
 const escape = require('escape-string-regexp')
 const pak = require('../package.json')
 
@@ -14,9 +15,10 @@ module.exports = {
   watchFolders: [root],
 
   // We need to make sure that only one version is loaded for peerDependencies
-  // So we blacklist them at the root, and alias them to the versions in example's node_modules
+  // So we blocklist them at the root, and alias them to the versions in example's node_modules
   resolver: {
-    blacklistRE: blacklist(
+    assetExts: defaults.assetExts.concat(['sjson', 'tflite', 'txt']),
+    blockList: exclusionList(
       modules.map(
         (m) =>
           new RegExp(`^${escape(path.join(root, 'node_modules', m))}\\/.*$`)
