@@ -7,6 +7,7 @@ import handleIntent from './handleIntent'
 export default function App() {
   // Used to only speak the greeting the first time
   const [sayGreeting, setSayGreeting] = useState(true)
+  const [error, setError] = useState('')
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -16,6 +17,7 @@ export default function App() {
           After you've given the tray microphone permission, say "Spokestack" to
           open the tray again.
         </Text>
+        {!!error && <Text style={styles.error}>{error}</Text>}
       </View>
       {/* The tray should be added outside any navigation containers */}
       <SpokestackTray
@@ -30,6 +32,9 @@ export default function App() {
             setSayGreeting(false)
           }
           return handleIntent(intent, slots, utterance)
+        }}
+        onError={(event) => {
+          setError(event.error)
         }}
         sayGreeting={sayGreeting}
         nlu={{
@@ -67,11 +72,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 10
   },
+  error: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 10
+  },
   start: {
     fontSize: 22,
     textAlign: 'center'
   },
   wakeword: {
-    textAlign: 'center'
+    textAlign: 'center',
+    marginBottom: 10
   }
 })

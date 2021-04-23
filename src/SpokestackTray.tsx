@@ -292,6 +292,7 @@ export default class SpokestackTray extends PureComponent<
   State
 > {
   private wentToBackground: boolean
+  private hasStarted = false
   private windowWidth = Dimensions.get('window').width
   private windowHeight: number
   private panX = new Animated.Value(0)
@@ -393,19 +394,29 @@ export default class SpokestackTray extends PureComponent<
     await this.initState()
     this.addListeners()
 
-    await Spokestack.initialize(
-      clientId,
-      clientSecret,
-      merge(spokestackConfig, {
-        traceLevel: debug ? TraceLevel.DEBUG : TraceLevel.NONE,
-        refreshModels,
-        pipeline: { profile },
-        nlu,
-        wakeword
-      })
-    ).catch(this.handleError)
+    try {
+      await Spokestack.initialize(
+        clientId,
+        clientSecret,
+        merge(spokestackConfig, {
+          traceLevel: debug ? TraceLevel.DEBUG : TraceLevel.NONE,
+          refreshModels,
+          pipeline: { profile },
+          nlu,
+          wakeword
+        })
+      )
+    } catch (error) {
+      console.error('Error during Spokestack.initialize()')
+      this.handleError(error)
+    }
     if (await checkSpeech()) {
-      await Spokestack.start()
+      try {
+        await Spokestack.start()
+      } catch (error) {
+        console.error('Error attempting to start on componentDidMount')
+        this.handleError(error)
+      }
     }
     this.showHandle()
   }
@@ -424,8 +435,9 @@ export default class SpokestackTray extends PureComponent<
     Spokestack.addEventListener('recognize', this.onRecognize)
     Spokestack.addEventListener('activate', this.onActivate)
     Spokestack.addEventListener('deactivate', this.onDeactivate)
+    Spokestack.addEventListener('start', this.onStart)
     Spokestack.addEventListener('timeout', this.close)
-    Spokestack.addEventListener('error', this.handleError)
+    Spokestack.addEventListener('error', this.onError)
   }
 
   private removeListeners() {
@@ -433,15 +445,19 @@ export default class SpokestackTray extends PureComponent<
     Spokestack.removeAllListeners()
   }
 
-  private appStateChange = (nextAppState: AppStateStatus) => {
+  private appStateChange = async (nextAppState: AppStateStatus) => {
     console.log(
       `App state changed to ${nextAppState}, and wentToBackground is ${this.wentToBackground}`
     )
     // Enable/disable wakeword based on app state
-    if (nextAppState === 'active' && this.wentToBackground) {
+    if (nextAppState === 'active') {
+      // Needs to be coming from the background
+      // and the pipeline must have been started at least once already
+      if (this.wentToBackground && this.hasStarted && (await checkSpeech())) {
+        console.log('App became active. Starting speech pipeline.')
+        Spokestack.start()
+      }
       this.wentToBackground = false
-      console.log('App became active. Starting wakeword.')
-      Spokestack.start()
     } else if (nextAppState === 'background') {
       this.wentToBackground = true
       console.log('App went to background. Stopping speech pipeline.')
@@ -466,7 +482,7 @@ export default class SpokestackTray extends PureComponent<
       if (silent || (isGreeting && !sayGreeting)) {
         this.addBubble({ text: response.prompt, isLeft: true })
         if (shouldListen) {
-          setTimeout(listen, 200)
+          setTimeout(this.listen, 200)
         } else {
           setTimeout(this.close, closeDelay)
         }
@@ -483,7 +499,7 @@ export default class SpokestackTray extends PureComponent<
   }
 
   private onRecognize = async ({ transcript }: SpokestackRecognizeEvent) => {
-    const { editTranscript, onError } = this.props
+    const { editTranscript } = this.props
     console.log('[Spokestack onRecognize]:', transcript)
     const edited = editTranscript(transcript)
     console.log('Transcript after editing: ', edited)
@@ -491,11 +507,14 @@ export default class SpokestackTray extends PureComponent<
     this.addBubble({ text: edited, isLeft: false })
     // Only call listeners if there's a transcript
     if (edited.length > 0) {
-      const result = await Spokestack.classify(edited).catch((error) => {
-        onError({ error: error.message })
-      })
-      if (result) {
-        this.handleIntent(result)
+      try {
+        const result = await Spokestack.classify(edited)
+        if (result) {
+          this.handleIntent(result)
+        }
+      } catch (error) {
+        console.error('Error during classification')
+        this.handleError(error)
       }
     }
   }
@@ -512,15 +531,25 @@ export default class SpokestackTray extends PureComponent<
     this.setState({ listening: false })
   }
 
-  private handleError = (error: SpokestackErrorEvent) => {
+  private onStart = () => {
+    this.hasStarted = true
+  }
+
+  private onError = (error: SpokestackErrorEvent) => {
     this.setState({ listening: false })
-    this.addBubble({
-      text: errorMessage,
-      isLeft: true
-    })
+    this.handleError(error)
+  }
+
+  private handleError = (error: SpokestackErrorEvent | Error) => {
+    console.error(error)
     const { onError } = this.props
     if (onError) {
-      onError(error)
+      const errorEvent = error as SpokestackErrorEvent
+      if (errorEvent.error) {
+        onError(errorEvent)
+      } else {
+        onError({ error: (error as Error).message })
+      }
     }
   }
 
@@ -539,7 +568,7 @@ export default class SpokestackTray extends PureComponent<
     this.setState({ playerSource: null }, async () => {
       if (this.listenWhenDone) {
         this.listenWhenDone = false
-        setTimeout(listen, 200)
+        setTimeout(this.listen, 200)
       } else {
         setTimeout(this.close, this.props.closeDelay)
       }
@@ -567,6 +596,15 @@ export default class SpokestackTray extends PureComponent<
     return Math.min(Math.max(minHeight, startHeight - dy), this.windowHeight)
   }
 
+  private listen = async () => {
+    try {
+      await listen()
+    } catch (e) {
+      console.error('Error attempting to listen.')
+      this.handleError(e)
+    }
+  }
+
   private async opened() {
     const { greet } = this.props
     const { listening } = this.state
@@ -577,7 +615,7 @@ export default class SpokestackTray extends PureComponent<
     if (greet) {
       this.handleIntent({ intent: 'greet', confidence: 100, slots: {} })
     } else {
-      listen()
+      this.listen()
     }
   }
 
@@ -665,7 +703,7 @@ export default class SpokestackTray extends PureComponent<
    * plays the audio, and adds a speech bubble.
    */
   say = async (input: string) => {
-    const { onError, ttsFormat: format, voice } = this.props
+    const { ttsFormat: format, voice } = this.props
     // Don't listen for wakeword if we're about to close the tray
     // This also helps with false positives on
     // goodbye messages that may include the wakeword.
@@ -685,11 +723,10 @@ export default class SpokestackTray extends PureComponent<
           }
           this.addBubble({ text: input, isLeft: true })
         })
-        .catch((error) => {
+        .catch((error: Error) => {
+          console.error(`Error synthesizing ${input}`)
           this.setState({ loading: false })
-          if (onError) {
-            onError(error)
-          }
+          this.handleError(error)
         })
     })
   }
