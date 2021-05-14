@@ -305,9 +305,8 @@ export default class SpokestackTray extends PureComponent<
     onPanResponderGrant: () => {
       const { height } = this.state
       this.setState({ pressed: true, startHeight: height })
-      const { width: windowWidth, height: windowHeight } = Dimensions.get(
-        'window'
-      )
+      const { width: windowWidth, height: windowHeight } =
+        Dimensions.get('window')
       this.windowWidth = windowWidth
       this.windowHeight = windowHeight
     },
@@ -466,13 +465,8 @@ export default class SpokestackTray extends PureComponent<
   }
 
   private async handleIntent(result: SpokestackNLUResult) {
-    const {
-      closeDelay,
-      exitNodes,
-      handleIntent,
-      onError,
-      sayGreeting
-    } = this.props
+    const { closeDelay, exitNodes, handleIntent, onError, sayGreeting } =
+      this.props
     const { silent } = this.state
     const response = handleIntent(result.intent, result.slots, this.utterance)
     console.log(`Processed intent ${result.intent}`, response)

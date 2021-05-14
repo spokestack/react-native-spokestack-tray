@@ -78,9 +78,10 @@ let data =
 
 // Add Spokestack tray props
 const source = read('../src/SpokestackTray.tsx')
-const defaultProps = /static defaultProps: Partial<SpokestackTrayProps> = ({[^]+?\n {2}})/.exec(
-  source
-)[1]
+const defaultProps =
+  /static defaultProps: Partial<SpokestackTrayProps> = ({[^]+?\n {2}})/.exec(
+    source
+  )[1]
 const parsedDefaults = {}
 defaultProps.replace(/(\w+): ([^]+?)(?:,\n|\n {2}})/g, (all, key, value) => {
   parsedDefaults[key] = value.replace(/'/g, '"')
