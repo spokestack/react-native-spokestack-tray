@@ -106,8 +106,8 @@ export interface SpokestackTrayProps {
    * // ...
    * nlu={{
    *   model: 'https://somecdn.com/nlu.tflite',
-   *   metadata: 'https://somecdn.com/metadata.json',
-   *   vocab: 'https://somecdn.com/vocab.txt'
+   *   vocab: 'https://somecdn.com/vocab.txt',
+   *   metadata: 'https://somecdn.com/metadata.json'
    * }}
    * ```
    *
@@ -119,8 +119,11 @@ export interface SpokestackTrayProps {
    * // ...
    * nlu={{
    *   model: require('./nlu.tflite'),
-   *   metadata: require('./metadata.json'),
-   *   vocab: require('./vocab.txt')
+   *   vocab: require('./vocab.txt'),
+   *   // IMPORTANT: a special extension is used for local metadata JSON files (`.sjson`) when using `require` or `import`
+   *   // so the file is not parsed when included but instead imported as a source object. This makes it so the
+   *   // file is read and parsed by the underlying native libraries instead.
+   *   metadata: require('./metadata.sjson')
    * }}
    * ```
    */
@@ -166,6 +169,56 @@ export interface SpokestackTrayProps {
    * that gets played whenever the tray starts listening.
    */
   haptic?: boolean
+  /**
+   * Configuration for keyword recognition
+   *
+   * The filter, detect, encode, and metadata fields accept 2 types of values.
+   * 1. A string representing a remote URL from which to download and cache the file (presumably from a CDN).
+   * 2. A source object retrieved by a `require` or `import` (e.g. `model: require('./nlu.tflite')`)
+   *
+   * See https://www.spokestack.io/docs/concepts/keywords to learn more about keyword recognition.
+   *
+   * @example
+   * ```js
+   * // ...
+   * keyword={{
+   *   detect: 'https://s.spokestack.io/u/UbMeX/detect.tflite',
+   *   encode: 'https://s.spokestack.io/u/UbMeX/encode.tflite',
+   *   filter: 'https://s.spokestack.io/u/UbMeX/filter.tflite',
+   *   metadata: 'https://s.spokestack.io/u/UbMeX/metadata.json'
+   * }}
+   * ```
+   *
+   * You can also download models ahead of time and include them from local files.
+   * Note: this requires a change to your metro.config.js. For more info, see
+   * "Including model files in your app bundle" in the README.md.
+   *
+   * ```js
+   * // ...
+   * keyword={{
+   *   detect: require('./detect.tflite'),
+   *   encode: require('./encode.tflite'),
+   *   filter: require('./filter.tflite'),
+   *   // IMPORTANT: a special extension is used for local metadata JSON files (`.sjson`) when using `require` or `import`
+   *   // so the file is not parsed when included but instead imported as a source object. This makes it so the
+   *   // file is read and parsed by the underlying native libraries instead.
+   *   metadata: require('./metadata.sjson')
+   * }}
+   * ```
+   *
+   * Keyword configuration also accepts a classes field for when metadata is not specified.
+   *
+   * ```js
+   * // ...
+   * keyword={{
+   *   detect: require('./detect.tflite'),
+   *   encode: require('./encode.tflite'),
+   *   filter: require('./filter.tflite'),
+   *   classes: ['one', 'two', 'three]
+   * }}
+   * ```
+   */
+  keyword?: SpokestackConfig['keyword']
   /** Minimum height for the tray */
   minHeight?: number
   /**
@@ -208,7 +261,7 @@ export interface SpokestackTrayProps {
   profile?: PipelineProfile
   /**
    * Use this sparingly to refresh the
-   * wakeword and NLU models on device
+   * wakeword, keyword, and NLU models on device
    * (force overwrite).
    * `<SpokestackTray refreshModels={process.env.NODE_ENV !== 'production'} ... />`
    */
@@ -252,9 +305,9 @@ export interface SpokestackTrayProps {
    * ```js
    * // ...
    * wakeword={{
-   *   filter: 'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/filter.tflite',
-   *   detect: 'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/detect.tflite',
-   *   encode: 'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/encode.tflite'
+   *   detect: 'https://s.spokestack.io/u/hgmYb/detect.tflite',
+   *   encode: 'https://s.spokestack.io/u/hgmYb/encode.tflite',
+   *   filter: 'https://s.spokestack.io/u/hgmYb/filter.tflite'
    * }}
    * ```
    *
@@ -265,9 +318,9 @@ export interface SpokestackTrayProps {
    * ```js
    * // ...
    * wakeword={{
-   *   filter: require('./filter.tflite'),
    *   detect: require('./detect.tflite'),
-   *   encode: require('./encode.tflite')
+   *   encode: require('./encode.tflite'),
+   *   filter: require('./filter.tflite')
    * }}
    * ```
    */
@@ -384,6 +437,7 @@ export default class SpokestackTray extends PureComponent<
       clientId,
       clientSecret,
       debug,
+      keyword,
       nlu,
       profile,
       refreshModels,
@@ -401,6 +455,7 @@ export default class SpokestackTray extends PureComponent<
           traceLevel: debug ? TraceLevel.DEBUG : TraceLevel.NONE,
           refreshModels,
           pipeline: { profile },
+          keyword,
           nlu,
           wakeword
         })
@@ -420,9 +475,9 @@ export default class SpokestackTray extends PureComponent<
     this.showHandle()
   }
 
-  async componentWillUnmount() {
-    this.removeListeners()
-    await Spokestack.stop()
+  componentWillUnmount() {
+    AppState.removeEventListener('change', this.appStateChange)
+    Spokestack.destroy()
   }
 
   private async initState() {
@@ -437,11 +492,9 @@ export default class SpokestackTray extends PureComponent<
     Spokestack.addEventListener('start', this.onStart)
     Spokestack.addEventListener('timeout', this.close)
     Spokestack.addEventListener('error', this.onError)
-  }
-
-  private removeListeners() {
-    AppState.removeEventListener('change', this.appStateChange)
-    Spokestack.removeAllListeners()
+    if (this.props.debug) {
+      Spokestack.addEventListener('trace', console.log.bind(console))
+    }
   }
 
   private appStateChange = async (nextAppState: AppStateStatus) => {

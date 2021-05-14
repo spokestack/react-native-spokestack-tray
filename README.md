@@ -328,7 +328,7 @@ See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the 
 
 Width (and height) of the mic button
 
-Defined in: [src/SpokestackTray.tsx:129](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L129)
+Defined in: [src/SpokestackTray.tsx:132](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L132)
 
 ### clientId
 
@@ -339,7 +339,7 @@ at https://spokestack.io/account.
 Create an account for free then generate a token.
 This is from the "ID" field.
 
-Defined in: [src/SpokestackTray.tsx:74](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L74)
+Defined in: [src/SpokestackTray.tsx:74](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L74)
 
 ### clientSecret
 
@@ -350,7 +350,7 @@ at https://spokestack.io/account.
 Create an account for free then generate a token.
 This is from the "secret" field.
 
-Defined in: [src/SpokestackTray.tsx:81](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L81)
+Defined in: [src/SpokestackTray.tsx:81](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L81)
 
 ### closeDelay
 
@@ -358,7 +358,7 @@ Defined in: [src/SpokestackTray.tsx:81](https://github.com/spokestack/react-nati
 
 How long to wait to close the tray after speaking (ms)
 
-Defined in: [src/SpokestackTray.tsx:131](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L131)
+Defined in: [src/SpokestackTray.tsx:134](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L134)
 
 ### debug
 
@@ -366,7 +366,7 @@ Defined in: [src/SpokestackTray.tsx:131](https://github.com/spokestack/react-nat
 
 Show debug messages from react-native-spokestack
 
-Defined in: [src/SpokestackTray.tsx:133](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L133)
+Defined in: [src/SpokestackTray.tsx:136](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L136)
 
 ### duration
 
@@ -374,7 +374,7 @@ Defined in: [src/SpokestackTray.tsx:133](https://github.com/spokestack/react-nat
 
 Duration for the tray animation (ms)
 
-Defined in: [src/SpokestackTray.tsx:135](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L135)
+Defined in: [src/SpokestackTray.tsx:138](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L138)
 
 ### easing
 
@@ -382,7 +382,7 @@ Defined in: [src/SpokestackTray.tsx:135](https://github.com/spokestack/react-nat
 
 Easing function for the tray animation
 
-Defined in: [src/SpokestackTray.tsx:137](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L137)
+Defined in: [src/SpokestackTray.tsx:140](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L140)
 
 ### editTranscript
 
@@ -391,7 +391,11 @@ Defined in: [src/SpokestackTray.tsx:137](https://github.com/spokestack/react-nat
 Edit the transcript before classification
 and before the user response bubble is shown.
 
-#### Parameters:
+#### Type declaration
+
+▸ (`transcript`: _string_): _string_
+
+#### Parameters
 
 | Name         | Type     |
 | :----------- | :------- |
@@ -399,7 +403,7 @@ and before the user response bubble is shown.
 
 **Returns:** _string_
 
-Defined in: [src/SpokestackTray.tsx:142](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L142)
+Defined in: [src/SpokestackTray.tsx:145](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L145)
 
 ### exitNodes
 
@@ -408,7 +412,7 @@ Defined in: [src/SpokestackTray.tsx:142](https://github.com/spokestack/react-nat
 All nodes in this array should end
 the conversation and close the tray
 
-Defined in: [src/SpokestackTray.tsx:147](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L147)
+Defined in: [src/SpokestackTray.tsx:150](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L150)
 
 ### fontFamily
 
@@ -417,7 +421,7 @@ Defined in: [src/SpokestackTray.tsx:147](https://github.com/spokestack/react-nat
 Font to use for "LISTENING...", "LOADING...",
 and chat bubble text.
 
-Defined in: [src/SpokestackTray.tsx:152](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L152)
+Defined in: [src/SpokestackTray.tsx:155](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L155)
 
 ### gradientColors
 
@@ -426,7 +430,7 @@ Defined in: [src/SpokestackTray.tsx:152](https://github.com/spokestack/react-nat
 Colors for the linear gradient shown when listening
 Can be any number of colors (recommended: 2-3)
 
-Defined in: [src/SpokestackTray.tsx:157](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L157)
+Defined in: [src/SpokestackTray.tsx:160](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L160)
 
 ### greet
 
@@ -436,11 +440,11 @@ Whether to greet the user with a welcome message
 when the tray opens.
 Note: `handleIntent` must respond to the "greet" intent.
 
-Defined in: [src/SpokestackTray.tsx:163](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L163)
+Defined in: [src/SpokestackTray.tsx:166](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L166)
 
 ### handleIntent
 
-• **handleIntent**: (`intent`: _string_, `slots?`: { [key: string]: SpokestackNLUSlot; }, `utterance?`: _string_) => _[IntentResult](#IntentResult)_
+• **handleIntent**: (`intent`: _string_, `slots?`: SpokestackNLUSlots, `utterance?`: _string_) => _[IntentResult](#IntentResult)_
 
 This function takes an intent from the NLU
 and returns an object with a unique conversation
@@ -450,17 +454,21 @@ to be processed by TTS and spoken.
 Note: the prompt is only shown in a chat bubble
 if sound has been turned off.
 
-#### Parameters:
+#### Type declaration
 
-| Name         | Type     |
-| :----------- | :------- |
-| `intent`     | _string_ |
-| `slots?`     | _object_ |
-| `utterance?` | _string_ |
+▸ (`intent`: _string_, `slots?`: SpokestackNLUSlots, `utterance?`: _string_): _[IntentResult](#IntentResult)_
+
+#### Parameters
+
+| Name         | Type               |
+| :----------- | :----------------- |
+| `intent`     | _string_           |
+| `slots?`     | SpokestackNLUSlots |
+| `utterance?` | _string_           |
 
 **Returns:** _[IntentResult](#IntentResult)_
 
-Defined in: [src/SpokestackTray.tsx:91](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L91)
+Defined in: [src/SpokestackTray.tsx:91](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L91)
 
 ### haptic
 
@@ -469,7 +477,51 @@ Defined in: [src/SpokestackTray.tsx:91](https://github.com/spokestack/react-nati
 Set this to false to disable the haptic
 that gets played whenever the tray starts listening.
 
-Defined in: [src/SpokestackTray.tsx:168](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L168)
+Defined in: [src/SpokestackTray.tsx:171](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L171)
+
+### keyword
+
+• `Optional` **keyword**: KeywordConfig
+
+Configuration for keyword recognition
+
+The filter, detect, encode, and metadata fields accept 2 types of values.
+
+1. A string representing a remote URL from which to download and cache the file (presumably from a CDN).
+2. A source object retrieved by a `require` or `import` (e.g. `model: require('./nlu.tflite')`)
+
+See https://www.spokestack.io/docs/concepts/keywords to learn more about keyword recognition.
+
+**`example`**
+
+```js
+// ...
+keyword={{
+  detect: 'https://s.spokestack.io/u/UbMeX/detect.tflite',
+  encode: 'https://s.spokestack.io/u/UbMeX/encode.tflite',
+  filter: 'https://s.spokestack.io/u/UbMeX/filter.tflite',
+  metadata: 'https://s.spokestack.io/u/UbMeX/metadata.json'
+}}
+```
+
+You can also download models ahead of time and include them from local files.
+Note: this requires a change to your metro.config.js. For more info, see
+"Including model files in your app bundle" in the README.md.
+
+```js
+// ...
+keyword={{
+  detect: require('./detect.tflite'),
+  encode: require('./encode.tflite'),
+  filter: require('./filter.tflite'),
+  // IMPORTANT: a special extension is used for local metadata JSON files (`.sjson`) when using `require` or `import`
+  // so the file is not parsed when included but instead imported as a source object. This makes it so the
+  // file is read and parsed by the underlying native libraries instead.
+  metadata: require('./metadata.sjson')
+}}
+```
+
+Defined in: [src/SpokestackTray.tsx:209](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L209)
 
 ### minHeight
 
@@ -477,7 +529,7 @@ Defined in: [src/SpokestackTray.tsx:168](https://github.com/spokestack/react-nat
 
 Minimum height for the tray
 
-Defined in: [src/SpokestackTray.tsx:170](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L170)
+Defined in: [src/SpokestackTray.tsx:211](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L211)
 
 ### nlu
 
@@ -496,8 +548,8 @@ See https://spokestack.io/docs/concepts/nlu to learn more about NLU.
 // ...
 nlu={{
   model: 'https://somecdn.com/nlu.tflite',
-  metadata: 'https://somecdn.com/metadata.json',
-  vocab: 'https://somecdn.com/vocab.txt'
+  vocab: 'https://somecdn.com/vocab.txt',
+  metadata: 'https://somecdn.com/metadata.json'
 }}
 ```
 
@@ -509,12 +561,15 @@ Note: this requires a change to your metro.config.js. For more info, see
 // ...
 nlu={{
   model: require('./nlu.tflite'),
-  metadata: require('./metadata.json'),
-  vocab: require('./vocab.txt')
+  vocab: require('./vocab.txt'),
+  // IMPORTANT: a special extension is used for local metadata JSON files (`.sjson`) when using `require` or `import`
+  // so the file is not parsed when included but instead imported as a source object. This makes it so the
+  // file is read and parsed by the underlying native libraries instead.
+  metadata: require('./metadata.sjson')
 }}
 ```
 
-Defined in: [src/SpokestackTray.tsx:127](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L127)
+Defined in: [src/SpokestackTray.tsx:130](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L130)
 
 ### onClose
 
@@ -522,9 +577,13 @@ Defined in: [src/SpokestackTray.tsx:127](https://github.com/spokestack/react-nat
 
 Called whenever the tray has closed
 
+#### Type declaration
+
+▸ (): _void_
+
 **Returns:** _void_
 
-Defined in: [src/SpokestackTray.tsx:174](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L174)
+Defined in: [src/SpokestackTray.tsx:215](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L215)
 
 ### onError
 
@@ -532,7 +591,11 @@ Defined in: [src/SpokestackTray.tsx:174](https://github.com/spokestack/react-nat
 
 Called whenever there's an error from Spokestack
 
-#### Parameters:
+#### Type declaration
+
+▸ (`e`: SpokestackErrorEvent): _void_
+
+#### Parameters
 
 | Name | Type                 |
 | :--- | :------------------- |
@@ -540,7 +603,7 @@ Called whenever there's an error from Spokestack
 
 **Returns:** _void_
 
-Defined in: [src/SpokestackTray.tsx:176](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L176)
+Defined in: [src/SpokestackTray.tsx:217](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L217)
 
 ### onOpen
 
@@ -548,9 +611,13 @@ Defined in: [src/SpokestackTray.tsx:176](https://github.com/spokestack/react-nat
 
 Called whenever the tray has opened
 
+#### Type declaration
+
+▸ (): _void_
+
 **Returns:** _void_
 
-Defined in: [src/SpokestackTray.tsx:178](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L178)
+Defined in: [src/SpokestackTray.tsx:219](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L219)
 
 ### orientation
 
@@ -558,7 +625,7 @@ Defined in: [src/SpokestackTray.tsx:178](https://github.com/spokestack/react-nat
 
 The tray button can be oriented on either side of the screen
 
-Defined in: [src/SpokestackTray.tsx:182](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L182)
+Defined in: [src/SpokestackTray.tsx:223](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L223)
 
 ### primaryColor
 
@@ -567,7 +634,7 @@ Defined in: [src/SpokestackTray.tsx:182](https://github.com/spokestack/react-nat
 This color is used to theme the tray
 and is used in the mic button and speech bubbles.
 
-Defined in: [src/SpokestackTray.tsx:187](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L187)
+Defined in: [src/SpokestackTray.tsx:228](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L228)
 
 ### profile
 
@@ -592,18 +659,18 @@ import { PipelineProfile } from 'react-native-spokestack'
 // ...
 ```
 
-Defined in: [src/SpokestackTray.tsx:208](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L208)
+Defined in: [src/SpokestackTray.tsx:249](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L249)
 
 ### refreshModels
 
 • `Optional` **refreshModels**: _boolean_
 
 Use this sparingly to refresh the
-wakeword and NLU models on device
+wakeword, keyword, and NLU models on device
 (force overwrite).
 `<SpokestackTray refreshModels={process.env.NODE_ENV !== 'production'} ... />`
 
-Defined in: [src/SpokestackTray.tsx:215](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L215)
+Defined in: [src/SpokestackTray.tsx:256](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L256)
 
 ### sayGreeting
 
@@ -613,7 +680,7 @@ Whether to speak the greeting or only display
 a chat bubble with the greet message,
 even if sound is on.
 
-Defined in: [src/SpokestackTray.tsx:221](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L221)
+Defined in: [src/SpokestackTray.tsx:262](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L262)
 
 ### soundOffImage
 
@@ -623,7 +690,7 @@ Defined in: [src/SpokestackTray.tsx:221](https://github.com/spokestack/react-nat
 
 Replace the sound off image by passing a React Image component
 
-Defined in: [src/SpokestackTray.tsx:225](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L225)
+Defined in: [src/SpokestackTray.tsx:266](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L266)
 
 ### soundOnImage
 
@@ -633,7 +700,7 @@ Defined in: [src/SpokestackTray.tsx:225](https://github.com/spokestack/react-nat
 
 Replace the sound on image by passing a React Image component
 
-Defined in: [src/SpokestackTray.tsx:223](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L223)
+Defined in: [src/SpokestackTray.tsx:264](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L264)
 
 ### spokestackConfig
 
@@ -644,7 +711,7 @@ function from react-native-spokestack.
 See https://github.com/spokestack/react-native-spokestack
 for available options.
 
-Defined in: [src/SpokestackTray.tsx:232](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L232)
+Defined in: [src/SpokestackTray.tsx:273](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L273)
 
 ### startHeight
 
@@ -652,7 +719,7 @@ Defined in: [src/SpokestackTray.tsx:232](https://github.com/spokestack/react-nat
 
 Starting height for tray
 
-Defined in: [src/SpokestackTray.tsx:234](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L234)
+Defined in: [src/SpokestackTray.tsx:275](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L275)
 
 ### style
 
@@ -660,7 +727,7 @@ Defined in: [src/SpokestackTray.tsx:234](https://github.com/spokestack/react-nat
 
 This style prop is passed to the tray's container
 
-Defined in: [src/SpokestackTray.tsx:236](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L236)
+Defined in: [src/SpokestackTray.tsx:277](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L277)
 
 ### ttsFormat
 
@@ -668,7 +735,7 @@ Defined in: [src/SpokestackTray.tsx:236](https://github.com/spokestack/react-nat
 
 The format for the text passed to Spokestack.synthesize
 
-Defined in: [src/SpokestackTray.tsx:238](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L238)
+Defined in: [src/SpokestackTray.tsx:279](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L279)
 
 ### voice
 
@@ -676,7 +743,7 @@ Defined in: [src/SpokestackTray.tsx:238](https://github.com/spokestack/react-nat
 
 A key for a voice in Spokestack TTS, passed to Spokestack.synthesize
 
-Defined in: [src/SpokestackTray.tsx:240](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L240)
+Defined in: [src/SpokestackTray.tsx:281](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L281)
 
 ### wakeword
 
@@ -696,9 +763,9 @@ Spokestack offers sample wakeword model files ("Spokestack"):
 ```js
 // ...
 wakeword={{
-  filter: 'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/filter.tflite',
-  detect: 'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/detect.tflite',
-  encode: 'https://d3dmqd7cy685il.cloudfront.net/model/wake/spokestack/encode.tflite'
+  detect: 'https://s.spokestack.io/u/hgmYb/detect.tflite',
+  encode: 'https://s.spokestack.io/u/hgmYb/encode.tflite',
+  filter: 'https://s.spokestack.io/u/hgmYb/filter.tflite'
 }}
 ```
 
@@ -709,13 +776,13 @@ Note: this requires a change to your metro.config.js. For more info, see
 ```js
 // ...
 wakeword={{
-  filter: require('./filter.tflite'),
   detect: require('./detect.tflite'),
-  encode: require('./encode.tflite')
+  encode: require('./encode.tflite'),
+  filter: require('./filter.tflite')
 }}
 ```
 
-Defined in: [src/SpokestackTray.tsx:274](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L274)
+Defined in: [src/SpokestackTray.tsx:315](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L315)
 
 #### IntentResult
 
@@ -725,7 +792,7 @@ Defined in: [src/SpokestackTray.tsx:274](https://github.com/spokestack/react-nat
 
 Any other data you might want to add
 
-Defined in: [src/SpokestackTray.tsx:64](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L64)
+Defined in: [src/SpokestackTray.tsx:64](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L64)
 
 ### noInterrupt
 
@@ -734,7 +801,7 @@ Defined in: [src/SpokestackTray.tsx:64](https://github.com/spokestack/react-nati
 Set to `true` to stop the wakeword recognizer
 during playback of the prompt.
 
-Defined in: [src/SpokestackTray.tsx:62](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L62)
+Defined in: [src/SpokestackTray.tsx:62](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L62)
 
 ### node
 
@@ -744,7 +811,7 @@ A user-defined key to indicate where the user is in the conversation
 Include this in the `exitNodes` prop if Spokestack should not listen
 again after saying the prompt.
 
-Defined in: [src/SpokestackTray.tsx:55](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L55)
+Defined in: [src/SpokestackTray.tsx:55](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L55)
 
 ### prompt
 
@@ -752,7 +819,7 @@ Defined in: [src/SpokestackTray.tsx:55](https://github.com/spokestack/react-nati
 
 Will be processed into Speech unless the tray is in silent mode
 
-Defined in: [src/SpokestackTray.tsx:57](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L57)
+Defined in: [src/SpokestackTray.tsx:57](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L57)
 
 ---
 
@@ -780,7 +847,7 @@ Open the tray, greet (if applicable), and listen
 
 **Returns:** _void_
 
-Defined in: [src/SpokestackTray.tsx:682](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L682)
+Defined in: [src/SpokestackTray.tsx:717](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L717)
 
 ### close
 
@@ -790,7 +857,7 @@ Close the tray, stop listening, and restart wakeword
 
 **Returns:** _void_
 
-Defined in: [src/SpokestackTray.tsx:693](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L693)
+Defined in: [src/SpokestackTray.tsx:728](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L728)
 
 ### say
 
@@ -799,7 +866,7 @@ Defined in: [src/SpokestackTray.tsx:693](https://github.com/spokestack/react-nat
 Passes the input to Spokestack.synthesize(),
 plays the audio, and adds a speech bubble.
 
-#### Parameters:
+#### Parameters
 
 | Name    | Type     |
 | :------ | :------- |
@@ -807,7 +874,7 @@ plays the audio, and adds a speech bubble.
 
 **Returns:** _Promise_<void\>
 
-Defined in: [src/SpokestackTray.tsx:705](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L705)
+Defined in: [src/SpokestackTray.tsx:740](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L740)
 
 ### addBubble
 
@@ -816,7 +883,7 @@ Defined in: [src/SpokestackTray.tsx:705](https://github.com/spokestack/react-nat
 Add a bubble (system or user)
 to the chat interface
 
-#### Parameters:
+#### Parameters
 
 | Name     | Type     |
 | :------- | :------- |
@@ -824,7 +891,7 @@ to the chat interface
 
 **Returns:** _void_
 
-Defined in: [src/SpokestackTray.tsx:738](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L738)
+Defined in: [src/SpokestackTray.tsx:773](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L773)
 
 #### Bubble
 
@@ -832,13 +899,13 @@ Defined in: [src/SpokestackTray.tsx:738](https://github.com/spokestack/react-nat
 
 • **isLeft**: _boolean_
 
-Defined in: [src/components/SpeechBubbles.tsx:9](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/components/SpeechBubbles.tsx#L9)
+Defined in: [src/components/SpeechBubbles.tsx:9](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/components/SpeechBubbles.tsx#L9)
 
 ### text
 
 • **text**: _string_
 
-Defined in: [src/components/SpeechBubbles.tsx:8](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/components/SpeechBubbles.tsx#L8)
+Defined in: [src/components/SpeechBubbles.tsx:8](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/components/SpeechBubbles.tsx#L8)
 
 ### toggleSilent
 
@@ -848,7 +915,7 @@ Toggle silent mode
 
 **Returns:** _Promise_<boolean\>
 
-Defined in: [src/SpokestackTray.tsx:755](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L755)
+Defined in: [src/SpokestackTray.tsx:790](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L790)
 
 ### isSilent
 
@@ -858,7 +925,7 @@ Returns whether the tray is in silent mode
 
 **Returns:** _boolean_
 
-Defined in: [src/SpokestackTray.tsx:767](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/SpokestackTray.tsx#L767)
+Defined in: [src/SpokestackTray.tsx:802](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/SpokestackTray.tsx#L802)
 
 ---
 
@@ -887,7 +954,7 @@ try {
 
 **Returns:** _Promise_<void\>
 
-Defined in: [src/Spokestack.ts:21](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/Spokestack.ts#L21)
+Defined in: [src/Spokestack.ts:21](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/Spokestack.ts#L21)
 
 ### stopListening
 
@@ -895,11 +962,11 @@ Defined in: [src/Spokestack.ts:21](https://github.com/spokestack/react-native-sp
 
 **Returns:** _Promise_<void\>
 
-Defined in: [src/Spokestack.ts:30](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/Spokestack.ts#L30)
+Defined in: [src/Spokestack.ts:30](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/Spokestack.ts#L30)
 
 ### isListening
 
-▸ `Const`**isListening**(): _Promise_<boolean\>
+▸ `Const` **isListening**(): _Promise_<boolean\>
 
 Returns whether Spokestack is currently listening
 
@@ -909,11 +976,11 @@ console.log(`isListening: ${await isListening()}`)
 
 **Returns:** _Promise_<boolean\>
 
-Defined in: [src/index.ts:19](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/index.ts#L19)
+Defined in: [src/index.ts:19](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/index.ts#L19)
 
 ### isInitialized
 
-▸ `Const`**isInitialized**(): _Promise_<boolean\>
+▸ `Const` **isInitialized**(): _Promise_<boolean\>
 
 Returns whether Spokestack has been initialized
 
@@ -923,11 +990,11 @@ console.log(`isInitialized: ${await isInitialized()}`)
 
 **Returns:** _Promise_<boolean\>
 
-Defined in: [src/index.ts:27](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/index.ts#L27)
+Defined in: [src/index.ts:27](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/index.ts#L27)
 
 ### isStarted
 
-▸ `Const`**isStarted**(): _Promise_<boolean\>
+▸ `Const` **isStarted**(): _Promise_<boolean\>
 
 Returns whether the speech pipeline has been started
 
@@ -937,11 +1004,11 @@ console.log(`isStarted: ${await isStarted()}`)
 
 **Returns:** _Promise_<boolean\>
 
-Defined in: [src/index.ts:35](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/index.ts#L35)
+Defined in: [src/index.ts:35](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/index.ts#L35)
 
 ### addEventListener
 
-▸ `Const`**addEventListener**(`eventType`: _string_, `listener`: (`event`: _any_) => _void_, `context?`: Object): EmitterSubscription
+▸ `Const` **addEventListener**(`eventType`: _string_, `listener`: (`event`: _any_) => _void_, `context?`: Object): EmitterSubscription
 
 Bind to any event emitted by the native libraries
 The events are: "recognize", "partial_recognize", "error", "activate", "deactivate", and "timeout".
@@ -957,7 +1024,7 @@ useEffect(() => {
 }, [])
 ```
 
-#### Parameters:
+#### Parameters
 
 | Name        | Type                       |
 | :---------- | :------------------------- |
@@ -967,11 +1034,11 @@ useEffect(() => {
 
 **Returns:** EmitterSubscription
 
-Defined in: [src/index.ts:51](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/index.ts#L51)
+Defined in: [src/index.ts:51](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/index.ts#L51)
 
 ### removeEventListener
 
-▸ `Const`**removeEventListener**(`eventType`: _string_, `listener`: (...`args`: _any_[]) => _any_): _void_
+▸ `Const` **removeEventListener**(`eventType`: _string_, `listener`: (...`args`: _any_[]) => _any_): _void_
 
 Remove an event listener
 
@@ -979,7 +1046,7 @@ Remove an event listener
 removeEventListener('recognize', onRecognize)
 ```
 
-#### Parameters:
+#### Parameters
 
 | Name        | Type                          |
 | :---------- | :---------------------------- |
@@ -988,11 +1055,11 @@ removeEventListener('recognize', onRecognize)
 
 **Returns:** _void_
 
-Defined in: [src/index.ts:59](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/index.ts#L59)
+Defined in: [src/index.ts:59](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/index.ts#L59)
 
 ### removeAllListeners
 
-▸ `Const`**removeAllListeners**(): _void_
+▸ `Const` **removeAllListeners**(): _void_
 
 Remove any existing listeners
 
@@ -1004,7 +1071,7 @@ componentWillUnmount() {
 
 **Returns:** _void_
 
-Defined in: [src/index.ts:69](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/index.ts#L69)
+Defined in: [src/index.ts:69](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/index.ts#L69)
 
 ---
 
@@ -1012,17 +1079,20 @@ Defined in: [src/index.ts:69](https://github.com/spokestack/react-native-spokest
 
 Use `addEventListener()`, `removeEventListener()`, and `removeAllListeners()` to add and remove events handlers. All events are available in both iOS and Android.
 
-| Name              |           Data           |                                                                   Description |
-| :---------------- | :----------------------: | ----------------------------------------------------------------------------: |
-| recognize         | `{ transcript: string }` |                     Fired whenever speech recognition completes successfully. |
-| partial_recognize | `{ transcript: string }` |              Fired whenever the transcript changes during speech recognition. |
-| timeout           |          `null`          |           Fired when an active pipeline times out due to lack of recognition. |
-| activate          |          `null`          | Fired when the speech pipeline activates, either through the VAD or manually. |
-| deactivate        |          `null`          |                                   Fired when the speech pipeline deactivates. |
-| play              |  `{ playing: boolean }`  |         Fired when TTS playback starts and stops. See the `speak()` function. |
-| error             |   `{ error: string }`    |                                    Fired when there's an error in Spokestack. |
+| Name              |           Data           |                                                                                                Description |
+| :---------------- | :----------------------: | ---------------------------------------------------------------------------------------------------------: |
+| recognize         | `{ transcript: string }` |                                                  Fired whenever speech recognition completes successfully. |
+| partial_recognize | `{ transcript: string }` |                                           Fired whenever the transcript changes during speech recognition. |
+| start             |          `null`          |                 Fired when the speech pipeline starts (which begins listening for wakeword or starts VAD). |
+| stop              |          `null`          |                                                                      Fired when the speech pipeline stops. |
+| activate          |          `null`          | Fired when the speech pipeline activates, either through the VAD, wakeword, or when calling `.activate()`. |
+| deactivate        |          `null`          |                                                                Fired when the speech pipeline deactivates. |
+| play              |  `{ playing: boolean }`  |                                      Fired when TTS playback starts and stops. See the `speak()` function. |
+| timeout           |          `null`          |                                        Fired when an active pipeline times out due to lack of recognition. |
+| trace             |  `{ message: string }`   |         Fired for trace messages. Verbosity is determined by the [`traceLevel`](#SpokestackConfig) option. |
+| error             |   `{ error: string }`    |                                                                 Fired when there's an error in Spokestack. |
 
-_When an error event is triggered, any existing promises are rejected as it's difficult to know exactly from where the error originated and whether it may affect other requests._
+_When an error event is triggered, any existing promises are rejected._
 
 ---
 
@@ -1049,7 +1119,7 @@ const hasPermission = await checkSpeech()
 
 **Returns:** _Promise_<boolean\>
 
-Defined in: [src/utils/permissions.ts:78](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/utils/permissions.ts#L78)
+Defined in: [src/utils/permissions.ts:78](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/utils/permissions.ts#L78)
 
 ### requestSpeech
 
@@ -1073,7 +1143,7 @@ const hasPermission = await requestSpeech()
 
 **Returns:** _Promise_<boolean\>
 
-Defined in: [src/utils/permissions.ts:106](https://github.com/spokestack/react-native-spokestack-tray/blob/9705309/src/utils/permissions.ts#L106)
+Defined in: [src/utils/permissions.ts:106](https://github.com/spokestack/react-native-spokestack-tray/blob/11684f7/src/utils/permissions.ts#L106)
 
 ---
 

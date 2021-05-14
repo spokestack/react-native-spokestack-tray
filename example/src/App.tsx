@@ -43,9 +43,9 @@ export default function App() {
           vocab: 'https://s.spokestack.io/u/7fYxV/vocab.txt'
         }}
         wakeword={{
-          filter: 'https://s.spokestack.io/u/hgmYb/filter.tflite',
           detect: 'https://s.spokestack.io/u/hgmYb/detect.tflite',
-          encode: 'https://s.spokestack.io/u/hgmYb/encode.tflite'
+          encode: 'https://s.spokestack.io/u/hgmYb/encode.tflite',
+          filter: 'https://s.spokestack.io/u/hgmYb/filter.tflite'
         }}
       />
     </View>
