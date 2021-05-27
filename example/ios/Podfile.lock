@@ -13,9 +13,9 @@ PODS:
     - ReactCommon/turbomodule/core (= 0.64.1)
   - filter_audio (0.5.0)
   - glog (0.3.5)
-  - Permission-Microphone (3.0.3):
+  - Permission-Microphone (3.0.4):
     - RNPermissions
-  - Permission-SpeechRecognition (3.0.3):
+  - Permission-SpeechRecognition (3.0.4):
     - RNPermissions
   - RCT-Folly (2020.01.13.00):
     - boost-for-react-native
@@ -284,7 +284,7 @@ PODS:
     - React-perflogger (= 0.64.1)
   - RNCAsyncStorage (1.12.1):
     - React-Core
-  - RNPermissions (3.0.3):
+  - RNPermissions (3.0.4):
     - React-Core
   - RNReactNativeHapticFeedback (1.11.0):
     - React-Core
@@ -430,8 +430,8 @@ SPEC CHECKSUMS:
   FBReactNativeSpec: 9a6de4a70d8ac6ba8cfadc72e22210d3988eacce
   filter_audio: 1f071989c5a9ad0e0c9c45d08084513deb30d065
   glog: 73c2498ac6884b13ede40eda8228cb1eee9d9d62
-  Permission-Microphone: 19d712e494fe874d61d9e537998d10237d28465b
-  Permission-SpeechRecognition: 6d5b877d6bc70ef4b6d9523cf469ba106a173d4f
+  Permission-Microphone: 6f1bff83dd1103e93503311e9957b3e94e21dd26
+  Permission-SpeechRecognition: a28796fbb57ac9169dc90cd5065b170bc27621a4
   RCT-Folly: ec7a233ccc97cc556cf7237f0db1ff65b986f27c
   RCTRequired: ec2ebc96b7bfba3ca5c32740f5a0c6a014a274d2
   RCTTypeSafety: 22567f31e67c3e088c7ac23ea46ab6d4779c0ea5
@@ -458,7 +458,7 @@ SPEC CHECKSUMS:
   React-runtimeexecutor: ff951a0c241bfaefc4940a3f1f1a229e7cb32fa6
   ReactCommon: bedc99ed4dae329c4fcf128d0c31b9115e5365ca
   RNCAsyncStorage: cb9a623793918c6699586281f0b51cbc38f046f9
-  RNPermissions: d6679ecf0c21bf6de5a619b20df4304182792da8
+  RNPermissions: 75128bfb4c4ef92f572a8efdb8adfbfab75e8ed0
   RNReactNativeHapticFeedback: 653a8c126a0f5e88ce15ffe280b3ff37e1fbb285
   Spokestack-iOS: 090ed0e757276f2407beec82fa851ec3e408b5b9
   TensorFlowLiteC: 51f50caf5777f740a70e2c1a5dbdc149e7aeb50b

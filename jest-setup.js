@@ -1,5 +1,5 @@
 /* global jest:false */
-const { NativeModules } = require('react-native')
+import { NativeModules } from 'react-native'
 
 NativeModules.RNCAsyncStorage = jest.fn()
 NativeModules.RNCNetInfo = jest.fn()
