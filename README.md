@@ -753,7 +753,10 @@ Defined in: [src/SpokestackTray.tsx:291](https://github.com/spokestack/react-nat
 
 • `Optional` **voice**: _string_ (Default: **"demo-male"**)
 
-A key for a voice in Spokestack TTS, passed to Spokestack.synthesize
+A key for a voice in Spokestack TTS, passed to Spokestack.synthesize.
+This may only be changed if you have created a custom voice using a
+Spokestack Maker account. See https://spokestack.io/pricing#maker.
+If not specified, Spokestack's Free "demo-male" voice is used.
 
 Defined in: [src/SpokestackTray.tsx:293](https://github.com/spokestack/react-native-spokestack-tray/blob/112b529/src/SpokestackTray.tsx#L293)
 

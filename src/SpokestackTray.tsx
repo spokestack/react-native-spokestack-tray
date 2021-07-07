@@ -289,7 +289,12 @@ export interface SpokestackTrayProps {
   style?: Animated.WithAnimatedValue<StyleProp<ViewStyle>>
   /** The format for the text passed to Spokestack.synthesize */
   ttsFormat?: TTSFormat
-  /** A key for a voice in Spokestack TTS, passed to Spokestack.synthesize */
+  /**
+   * A key for a voice in Spokestack TTS, passed to Spokestack.synthesize.
+   * This may only be changed if you have created a custom voice using a
+   * Spokestack Maker account. See https://spokestack.io/pricing#maker.
+   * If not specified, Spokestack's Free "demo-male" voice is used.
+   */
   voice?: string
   /**
    * The NLU Tensorflow Lite models (.tflite) for wakeword.
