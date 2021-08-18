@@ -213,7 +213,7 @@ PODS:
     - React-jsi (= 0.65.0)
     - React-perflogger (= 0.65.0)
   - React-jsinspector (0.65.0)
-  - react-native-spokestack (6.1.2):
+  - react-native-spokestack (6.1.3):
     - React
     - Spokestack-iOS (= 14.1.0)
   - react-native-video (5.1.1):
@@ -448,7 +448,7 @@ SPEC CHECKSUMS:
   React-jsi: 875bcbe2037c9cae07fbda7dd5827fbca06cbdc6
   React-jsiexecutor: 11ec08ad247abb44113ccb3d2b66f7e856d1cdf4
   React-jsinspector: 2aa5dc1b9a02a81c0dcc70c00f2cbe1cd4b875c4
-  react-native-spokestack: 099842491c2ea7a69de9aaf6ab1d6b40c6a26431
+  react-native-spokestack: 5d36e9afb5134fe97a3e9c0c6e3fc6cbb8d27e7f
   react-native-video: 1574074179ecaf6a9dd067116c8f31bf9fec15c8
   React-perflogger: 494c61caaf9b7da0a0a612fa4ed570ab7ab5819b
   React-RCTActionSheet: 0ea18583618e2451889be1ce1f658ae8cb436b2e
