@@ -703,7 +703,7 @@ export default class SpokestackTray extends PureComponent<
         toValue: shouldOpen ? 0.25 : 0
       })
     ]).start(() => {
-      const { onOpen, onClose } = this.props
+      const { onClose, onOpen } = this.props
       this.setState({ open: shouldOpen })
       if (shouldOpen) {
         Keyboard.dismiss()
@@ -720,10 +720,19 @@ export default class SpokestackTray extends PureComponent<
           onOpen()
         }
       } else {
-        stopListening().then(Spokestack.start)
-        if (onClose) {
-          onClose()
-        }
+        stopListening()
+          .then(Spokestack.start)
+          .then(() => {
+            if (onClose) {
+              onClose()
+            }
+          })
+          .catch((error) => {
+            if (onClose) {
+              onClose()
+            }
+            this.handleError(error)
+          })
       }
     })
   }
